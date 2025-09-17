@@ -31,6 +31,7 @@
       min-height: 100vh;
       position: relative;
       overflow: hidden;
+      background: #ffffff;
     }
 
     .page.hidden {
@@ -70,43 +71,43 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.25) !important;
     }
 
-    /* 통일된 질문 위치 - 페이지 상단 고정 */
+    /* 질문 위치 및 크기 조정 */
     .question-area {
       position: absolute;
       top: 60px;
       left: 50%;
       transform: translateX(-50%);
       width: 90%;
-      max-width: 400px;
+      max-width: 380px;
       text-align: center;
       z-index: 10;
     }
 
     .question-number {
-      font-size: 14px;
-      color: #999;
-      margin-bottom: 10px;
+      font-size: 16px;
+      color: #777;
+      margin-bottom: 8px;
       font-family: 'Pretendard', sans-serif;
     }
 
     .question-title {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 700;
-      color: #333;
-      line-height: 1.4;
+      color: #222;
+      line-height: 1.3;
       margin: 0;
       font-family: 'Pretendard', sans-serif;
     }
 
     .question-subtitle {
-      font-size: 14px;
-      color: #666;
+      font-size: 18px;
+      color: #555;
       line-height: 1.4;
       font-family: 'Pretendard', sans-serif;
-      margin: 10px 0 0 0;
+      margin: 12px 0 0 0;
     }
 
-    /* 통일된 다이얼 위치 - 페이지 중앙 고정 */
+    /* 다이얼 위치 */
     .dial-area {
       position: absolute;
       top: 50%;
@@ -129,6 +130,18 @@
       pointer-events: none;
       user-select: none;
       -webkit-user-drag: none;
+      transition: transform 0.3s ease;
+    }
+
+    /* Q3 다이얼은 드래그 가능하고 회전됨 */
+    .q3-draggable-dial {
+      cursor: grab;
+      pointer-events: all;
+      transition: transform 0.3s ease;
+    }
+
+    .q3-draggable-dial:active {
+      cursor: grabbing;
     }
 
     /* 터치패드 */
@@ -147,7 +160,7 @@
       overflow: hidden;
     }
 
-    /* 터치패드 색상 오버레이 - 중앙에서 채워짐 */
+    /* 터치패드 색상 오버레이 */
     .touch-pad::before {
       content: '';
       position: absolute;
@@ -175,7 +188,7 @@
       background: radial-gradient(circle, rgba(153, 163, 255, 0.7) 0%, rgba(153, 163, 255, 0.3) 80%, transparent 90%);
     }
 
-    /* Q1 온도 디스플레이 - LED 효과 (하얗고 뿌옇게) */
+    /* Q1 온도 디스플레이 - LED 효과 (흰색 글자) */
     .temperature-display {
       font-size: 20px;
       font-weight: 800;
@@ -205,16 +218,16 @@
       }
     }
 
-    /* 통일된 NEXT 버튼 위치 - 페이지 하단 고정 */
+    /* NEXT 버튼 위치 */
     .button-area {
       position: absolute;
-      bottom: 80px;
+      bottom: 50px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
     }
 
-    /* NEXT 버튼 - 검은색 배경, 흰색 글씨, 크기 축소, PRETENDARD BOLD */
+    /* NEXT 버튼 스타일 */
     .btn-next {
       background: #000 !important;
       color: #fff !important;
@@ -240,10 +253,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
     }
 
-    .btn-next:active {
-      transform: translateY(0px) !important;
-    }
-
     .btn-next.disabled {
       background: #555 !important;
       color: #aaa !important;
@@ -254,7 +263,7 @@
 
     /* START 페이지 */
     .start-page {
-      background: linear-gradient(135deg, #f8f9ff 0%, #fff 50%, #f0f2ff 100%);
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -368,43 +377,28 @@
       box-shadow: 0 6px 20px rgba(158, 164, 255, 0.3);
     }
 
-    /* 페이지별 배경 */
-    .q1-page {
-      background: linear-gradient(135deg, #fff8f0 0%, #fff 50%, #f0f8ff 100%);
-    }
-
-    .q2-page {
-      background: linear-gradient(135deg, #f0fff4 0%, #fff 50%, #f8fff8 100%);
-    }
-
-    .q3-page {
-      background: linear-gradient(135deg, #f0f8ff 0%, #fff 50%, #e6f3ff 100%);
-    }
-
-    .q4-page {
-      background: linear-gradient(135deg, #fff0f5 0%, #fff 50%, #fdf0f8 100%);
-    }
-
     /* Q2 날씨 선택 영역 */
     .weather-area {
       position: absolute;
-      top: 140px;
+      top: 160px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
+      width: 100%;
+      max-width: 320px;
     }
 
     .weather-buttons {
       display: flex;
       justify-content: center;
-      gap: 15px;
+      gap: 8px;
       margin-bottom: 30px;
       flex-wrap: wrap;
     }
 
     .weather-btn {
-      padding: 12px 24px;
-      font-size: 16px;
+      padding: 10px 18px;
+      font-size: 15px;
       border: none;
       border-radius: 25px;
       background: #fff;
@@ -415,6 +409,7 @@
       font-weight: 500;
       position: relative;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      min-width: 65px;
     }
 
     .weather-btn:hover {
@@ -422,7 +417,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .weather-btn.selected::after {
+    .weather-btn::after {
       content: '';
       position: absolute;
       top: -4px;
@@ -432,6 +427,11 @@
       background: #5A67D8;
       border-radius: 50%;
       box-shadow: 0 1px 3px rgba(90, 103, 216, 0.3);
+      display: none;
+    }
+
+    .weather-btn.selected::after {
+      display: block;
     }
 
     /* Q2 다이얼 진동 효과 */
@@ -493,26 +493,64 @@
       80% { transform: rotate(var(--rotation, 0deg)) translate(-1px, -1px); }
     }
 
-    /* Q2 터치패드 배경 */
+    /* Q2 터치패드 - 다이얼과 함께 진동 */
     .q2-touch-pad {
       position: absolute;
       width: 300px;
       height: 300px;
       border-radius: 50%;
-      z-index: 1;
+      z-index: 3;
       background: url('https://i.imgur.com/FTZhg6Z.png') no-repeat center center;
       background-size: cover;
       pointer-events: none;
     }
 
-    /* 파형 진동 바 */
+    .q2-touch-pad.vibration-0 {
+      animation: none;
+    }
+
+    .q2-touch-pad.vibration-1 {
+      animation: vibrate-pad-1 0.1s infinite;
+    }
+
+    .q2-touch-pad.vibration-2 {
+      animation: vibrate-pad-2 0.08s infinite;
+    }
+
+    .q2-touch-pad.vibration-3 {
+      animation: vibrate-pad-3 0.06s infinite;
+    }
+
+    @keyframes vibrate-pad-1 {
+      0%, 100% { transform: translate(0px, 0px); }
+      25% { transform: translate(0.5px, 0.5px); }
+      50% { transform: translate(-0.5px, 0px); }
+      75% { transform: translate(0px, -0.5px); }
+    }
+
+    @keyframes vibrate-pad-2 {
+      0%, 100% { transform: translate(0px, 0px); }
+      25% { transform: translate(1px, 1px); }
+      50% { transform: translate(-1px, 0px); }
+      75% { transform: translate(0px, -1px); }
+    }
+
+    @keyframes vibrate-pad-3 {
+      0%, 100% { transform: translate(0px, 0px); }
+      20% { transform: translate(1.5px, 1.5px); }
+      40% { transform: translate(-1.5px, 1px); }
+      60% { transform: translate(1px, -1.5px); }
+      80% { transform: translate(-1px, -1px); }
+    }
+
+    /* 진동바 파형 - 얇게 수정하고 흐르는 애니메이션 추가 */
     .waveform-container {
       position: absolute;
       top: -50px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 3;
-      width: 200px;
+      z-index: 4;
+      width: 160px;
       height: 30px;
     }
 
@@ -522,41 +560,61 @@
     }
 
     .waveform-path {
-      stroke: #9EA4FF;
-      stroke-width: 2;
+      stroke: #666;
+      stroke-width: 2; /* 3에서 2로 얇게 수정 */
       fill: none;
-      transition: stroke 0.3s ease;
+      transition: all 0.3s ease;
     }
 
+    /* 파형 흐르는 애니메이션 */
     .waveform-path.level-0 {
-      stroke: #ddd;
-      opacity: 0.3;
+      stroke: #666;
+      opacity: 0.8;
+      animation: none;
     }
 
     .waveform-path.level-1 {
-      stroke: #9EA4FF;
-      opacity: 0.6;
+      stroke: #7B83FF;
+      opacity: 0.9;
+      animation: waveFlow 2s linear infinite;
     }
 
     .waveform-path.level-2 {
-      stroke: #7B83FF;
-      opacity: 0.8;
+      stroke: #5A67D8;
+      opacity: 0.95;
+      animation: waveFlow 1.5s linear infinite;
     }
 
     .waveform-path.level-3 {
-      stroke: #5A67D8;
+      stroke: #3F51B5;
       opacity: 1.0;
+      animation: waveFlow 1s linear infinite;
     }
 
-    /* Q3, Q4 추가 선택 영역 */
-    .selection-area {
+    @keyframes waveFlow {
+      0% {
+        stroke-dasharray: 0 200;
+        stroke-dashoffset: 0;
+      }
+      50% {
+        stroke-dasharray: 100 100;
+        stroke-dashoffset: -50;
+      }
+      100% {
+        stroke-dasharray: 0 200;
+        stroke-dashoffset: -200;
+      }
+    }
+
+    /* Q3 이모지 표시 */
+    .emoji-display {
       position: absolute;
-      bottom: 200px;
+      top: -45px;
       left: 50%;
       transform: translateX(-50%);
-      display: flex;
-      gap: 30px;
-      z-index: 10;
+      z-index: 5;
+      font-size: 32px;
+      transition: all 0.3s ease;
     }
 
     /* Q4 감정 다이얼 */
@@ -622,7 +680,7 @@
 
     /* 로딩 페이지 */
     .loading-page {
-      background: linear-gradient(135deg, #f8f9ff 0%, #fff 50%, #f0f2ff 100%);
+      background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -644,7 +702,7 @@
 
     /* 결과 페이지 */
     .result-page {
-      background: linear-gradient(135deg, #fff8f0 0%, #fff 50%, #f0f8ff 100%);
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -678,108 +736,36 @@
         font-size: 24px;
       }
       
-      .start-subtitle {
-        font-size: 14px;
-      }
-      
-      .input-container {
-        width: 280px;
-      }
-      
-      .name-input {
-        font-size: 16px;
-      }
-
       .question-title {
-        font-size: 15px;
-      }
-
-      .dial-area {
-        width: 300px;
-        height: 300px;
-      }
-
-      .dial-background, .q2-draggable-dial {
-        width: 300px;
-        height: 300px;
-      }
-
-      .touch-pad, .q2-touch-pad {
-        width: 260px;
-        height: 260px;
-      }
-
-      .temperature-display {
         font-size: 18px;
       }
 
-      .weather-buttons {
-        gap: 10px;
-      }
-
-      .weather-btn {
-        padding: 10px 20px;
-        font-size: 14px;
-      }
-
-      .btn {
-        padding: 14px 35px;
+      .question-subtitle {
         font-size: 16px;
-      }
-
-      .waveform-container {
-        width: 150px;
-        height: 25px;
-        top: -40px;
-      }
-
-      .selection-area {
-        flex-direction: column;
-        gap: 15px;
-        bottom: 180px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .start-title {
-        font-size: 22px;
-      }
-      
-      .input-container {
-        width: 260px;
       }
 
       .dial-area {
-        width: 260px;
-        height: 260px;
+        width: 300px;
+        height: 300px;
       }
 
       .dial-background, .q2-draggable-dial {
-        width: 260px;
-        height: 260px;
+        width: 300px;
+        height: 300px;
       }
 
       .touch-pad, .q2-touch-pad {
-        width: 220px;
-        height: 220px;
-      }
-
-      .temperature-display {
-        font-size: 16px;
-      }
-
-      .dial-control {
-        width: 200px;
-      }
-
-      .dial-input {
-        width: 150px;
+        width: 260px;
+        height: 260px;
       }
 
       .waveform-container {
         width: 120px;
-        height: 20px;
-        top: -35px;
+      }
+
+      .emoji-display {
+        font-size: 28px;
+        top: -40px;
       }
     }
   </style>
@@ -848,7 +834,7 @@
 
     <div class="weather-area">
       <div class="weather-buttons">
-        <button id="weather-clear-btn" class="weather-btn selected">맑음</button>
+        <button id="weather-clear-btn" class="weather-btn">맑음</button>
         <button id="weather-rain-btn" class="weather-btn">비</button>
         <button id="weather-snow-btn" class="weather-btn">눈</button>
         <button id="weather-wind-btn" class="weather-btn">바람</button>
@@ -857,13 +843,13 @@
 
     <div class="dial-area">
       <div class="waveform-container">
-        <svg class="waveform-svg" viewBox="0 0 200 30">
-          <path id="waveform-path" class="waveform-path level-0" d="M 10 15 L 30 15 Q 35 10 40 15 T 50 15 L 60 15 Q 70 8 80 15 T 100 15 L 110 15 Q 120 12 130 15 T 150 15 L 170 15 Q 175 18 180 15 T 190 15" />
+        <svg class="waveform-svg" viewBox="0 0 160 30">
+          <path id="waveform-path" class="waveform-path level-0" d="M 10 15 L 150 15" />
         </svg>
       </div>
 
-      <div class="q2-touch-pad"></div>
       <img id="q2-draggable-dial" src="https://i.imgur.com/okVDs9K.png" alt="드래그 가능한 다이얼" class="q2-draggable-dial vibration-0">
+      <div id="q2-touch-pad" class="q2-touch-pad vibration-0"></div>
     </div>
 
     <div class="button-area">
@@ -878,16 +864,13 @@
     <div class="question-area">
       <div class="question-number">*총 네개의 질문으로 구성되어있습니다.</div>
       <h2 class="question-title">Q3. 그 때의 주변 환경은 자연과 도시중 어느곳에 가까웠나요?</h2>
+      <p class="question-subtitle">다이얼을 좌측으로 돌리면 자연, 우측으로 돌리면 도시 소리가 납니다. 다이얼을 돌려 표현해보세요.</p>
     </div>
 
     <div class="dial-area">
-      <img src="https://i.imgur.com/okVDs9K.png" alt="다이얼 이미지" class="dial-background">
-      <div id="q3-touch-pad" class="touch-pad level-0"></div>
-    </div>
-
-    <div class="selection-area">
-      <button id="env-nature-btn" class="btn btn-secondary">자연</button>
-      <button id="env-city-btn" class="btn btn-secondary">도시</button>
+      <div class="emoji-display" id="q3-emoji">🏞️</div>
+      <img src="https://i.imgur.com/OS1T7IS.png" alt="Q3 다이얼 이미지" class="dial-background q3-draggable-dial" id="q3-dial">
+      <div id="q3-touch-pad" class="touch-pad level-0" style="background-image: url('https://i.imgur.com/RouU2oD.png');"></div>
     </div>
 
     <div class="button-area">
@@ -940,11 +923,13 @@
     let currentPage = 'start';
     let answers = {};
     let touchLevel = 0;
-    let selectedWeather = 'clear';
+    let selectedWeather = null;
     let q2DialRotation = 0;
     let q2DialStep = 0;
+    let q3EnvironmentStep = 1; // 0: 자연, 1: 중립, 2: 도시
+    let q3DialRotation = 0; // Q3 다이얼 회전 각도
 
-    // 온도 단계 (36.5°C부터 5도씩 증가)
+    // 온도 단계
     const temperatureLevels = [36.5, 41.5, 46.5, 51.5];
 
     // 결과 이미지들
@@ -953,6 +938,57 @@
       'https://i.imgur.com/rYmbPsr.png', 
       'https://i.imgur.com/KI2WR6a.png'
     ];
+
+    // 오디오 요소들
+    let natureAudio, cityAudio;
+
+    // 오디오 초기화
+    function initAudio() {
+      if (!natureAudio) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const createNatureSound = () => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+          oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.3);
+          
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.3);
+        };
+
+        const createCitySound = () => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+          oscillator.frequency.setValueAtTime(300, audioContext.currentTime + 0.1);
+          
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
+          gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.15);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.4);
+        };
+
+        natureAudio = { play: createNatureSound };
+        cityAudio = { play: createCitySound };
+      }
+    }
 
     // DOM 요소들
     const nameInput = document.getElementById('name-input');
@@ -963,10 +999,57 @@
 
     // Q2 요소들
     const q2DraggableDial = document.getElementById('q2-draggable-dial');
+    const q2TouchPad = document.getElementById('q2-touch-pad');
     const waveformPath = document.getElementById('waveform-path');
 
     // Q3 요소들
     const q3TouchPad = document.getElementById('q3-touch-pad');
+    const q3Emoji = document.getElementById('q3-emoji');
+    const q3Dial = document.getElementById('q3-dial');
+
+    // 완전 초기화 함수
+    function resetAll() {
+      answers = {};
+      touchLevel = 0;
+      selectedWeather = null;
+      q2DialRotation = 0;
+      q2DialStep = 0;
+      q3EnvironmentStep = 1;
+      q3DialRotation = 0;
+      
+      nameInput.value = '';
+      startBtn.classList.add('disabled');
+      
+      document.querySelectorAll('.btn').forEach(btn => {
+        btn.classList.remove('selected', 'disabled');
+      });
+      
+      // Q1 초기화
+      touchPad.className = 'touch-pad level-0';
+      temperatureDisplay.textContent = '36.5°C';
+      q1NextBtn.classList.add('disabled');
+      
+      // Q2 초기화
+      document.querySelectorAll('.weather-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      q2DraggableDial.className = 'q2-draggable-dial vibration-0';
+      q2DraggableDial.style.setProperty('--rotation', '0deg');
+      q2TouchPad.className = 'q2-touch-pad vibration-0';
+      waveformPath.className = 'waveform-path level-0';
+      waveformPath.setAttribute('d', 'M 10 15 L 150 15');
+      document.getElementById('q2-next-btn').classList.add('disabled');
+      
+      // Q3 초기화
+      q3TouchPad.className = 'touch-pad level-0';
+      q3Emoji.textContent = '🏞️';
+      q3Dial.style.transform = 'rotate(0deg)'; // 다이얼 회전 초기화
+      document.getElementById('q3-next-btn').classList.add('disabled');
+      
+      // Q4 초기화
+      document.getElementById('emotion-dial').value = 25;
+      document.getElementById('emotion-temperature-display').textContent = '25°C';
+    }
 
     // 페이지 전환 함수
     function showPage(pageId) {
@@ -981,24 +1064,27 @@
       }
       
       currentPage = pageId;
-      console.log('현재 페이지:', pageId);
     }
 
-    // ========== BACK 버튼 이벤트 리스너들 ==========
+    // BACK 버튼 이벤트 리스너들
     document.getElementById('q1-back-btn').addEventListener('click', function() {
+      resetAll();
       showPage('start');
     });
 
     document.getElementById('q2-back-btn').addEventListener('click', function() {
-      showPage('q1');
+      resetAll();
+      showPage('start');
     });
 
     document.getElementById('q3-back-btn').addEventListener('click', function() {
-      showPage('q2');
+      resetAll();
+      showPage('start');
     });
 
     document.getElementById('q4-back-btn').addEventListener('click', function() {
-      showPage('q3');
+      resetAll();
+      showPage('start');
     });
 
     // START 페이지 로직
@@ -1007,23 +1093,17 @@
       startBtn.classList.toggle('disabled', !isValid);
     });
 
-    nameInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter' && !startBtn.classList.contains('disabled')) {
-        handleStart();
-      }
-    });
-
     startBtn.addEventListener('click', handleStart);
 
     function handleStart() {
       if (startBtn.classList.contains('disabled')) return;
       
       answers.userName = nameInput.value.trim();
-      console.log('사용자 이름:', answers.userName);
+      initAudio();
       showPage('q1');
     }
 
-    // Q1 페이지 로직 (온도 터치패드) - 순환 구조
+    // Q1 페이지 로직
     touchPad.addEventListener('click', function(e) {
       if (touchLevel === 3) {
         touchLevel = 0;
@@ -1060,18 +1140,14 @@
       } else {
         q1NextBtn.classList.add('disabled');
       }
-      
-      console.log('현재 터치 레벨:', touchLevel, '온도:', currentTemp + '°C');
     });
 
     q1NextBtn.addEventListener('click', function() {
       if (this.classList.contains('disabled')) return;
-      
-      console.log('선택된 온도:', answers.temperature);
       showPage('q2');
     });
 
-    // Q2 페이지 로직 (날씨 선택 + 다이얼)
+    // Q2 페이지 로직
     const weatherButtons = [
       document.getElementById('weather-clear-btn'),
       document.getElementById('weather-rain-btn'),
@@ -1083,7 +1159,6 @@
     let isQ2Dragging = false;
     let q2LastAngle = 0;
 
-    // 각도 계산 함수
     function getQ2Angle(clientX, clientY) {
       const rect = q2DraggableDial.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -1091,38 +1166,32 @@
       return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
     }
 
-    // 각도 차이 정규화
     function normalizeQ2AngleDiff(angle) {
       while (angle > 180) angle -= 360;
       while (angle < -180) angle += 360;
       return angle;
     }
 
-    // Q2 다이얼 피드백 애니메이션
-    function triggerQ2DialFeedback(stepAngle) {
-      q2DraggableDial.classList.remove('feedback');
-      q2DraggableDial.style.setProperty('--current-rotation', `${stepAngle}deg`);
-      q2DraggableDial.offsetHeight;
-      q2DraggableDial.classList.add('feedback');
-      setTimeout(() => {
-        q2DraggableDial.classList.remove('feedback');
-      }, 200);
-    }
-
-    // Q2 진동 및 파형 업데이트
     function updateQ2Vibration() {
-      // 진동 클래스 업데이트 (다이얼 흔들림)
       q2DraggableDial.className = `q2-draggable-dial vibration-${q2DialStep}`;
-      
-      // 파형 상태 업데이트 (흔들림 없음)
+      q2TouchPad.className = `q2-touch-pad vibration-${q2DialStep}`;
       waveformPath.className = `waveform-path level-${q2DialStep}`;
       
-      // 회전 각도 설정
+      // 더 자연스러운 파형들
+      const waveforms = [
+        'M 10 15 L 150 15',
+        'M 10 15 L 40 15 Q 60 12 80 15 L 120 15 Q 140 12 150 15',
+        'M 10 15 L 30 15 Q 45 8 60 15 Q 75 22 90 15 Q 105 8 120 15 Q 135 22 150 15',
+        'M 10 15 Q 20 8 30 15 Q 40 22 50 15 Q 60 8 70 15 Q 80 22 90 15 Q 100 8 110 15 Q 120 22 130 15 Q 140 8 150 15'
+      ];
+      
+      waveformPath.setAttribute('d', waveforms[q2DialStep]);
+      
       const stepAngles = [0, 90, 180, 270];
       const targetAngle = stepAngles[q2DialStep];
       q2DraggableDial.style.setProperty('--rotation', `${targetAngle}deg`);
       
-      if (q2DialStep > 0) {
+      if (selectedWeather && q2DialStep > 0) {
         answers.weather = {
           type: selectedWeather,
           intensity: q2DialStep
@@ -1133,8 +1202,9 @@
       }
     }
 
-    // Q2 드래그 시작
     function startQ2Drag(e) {
+      if (!selectedWeather) return;
+      
       isQ2Dragging = true;
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -1144,7 +1214,6 @@
       e.preventDefault();
     }
 
-    // Q2 드래그 중
     function moveQ2Drag(e) {
       if (!isQ2Dragging) return;
       
@@ -1161,18 +1230,15 @@
       
       if (newStep !== q2DialStep && newStep >= 0 && newStep <= 3) {
         q2DialStep = newStep;
-        triggerQ2DialFeedback(q2DialStep * 90);
         updateQ2Vibration();
       } else {
-        const currentRotation = q2DialRotation;
-        q2DraggableDial.style.setProperty('--rotation', `${currentRotation}deg`);
+        q2DraggableDial.style.setProperty('--rotation', `${q2DialRotation}deg`);
       }
       
       q2LastAngle = currentAngle;
       e.preventDefault();
     }
 
-    // Q2 드래그 종료
     function endQ2Drag() {
       if (!isQ2Dragging) return;
       
@@ -1205,48 +1271,144 @@
       button.classList.add('selected');
       
       selectedWeather = weather;
-      console.log('선택된 날씨:', weather);
-      
       updateQ2Vibration();
     }
 
     q2NextBtn.addEventListener('click', function() {
       if (this.classList.contains('disabled')) return;
-      console.log('날씨 정보:', answers.weather);
       showPage('q3');
     });
 
-    // Q3 페이지 로직 (환경 선택)
-    const envNatureBtn = document.getElementById('env-nature-btn');
-    const envCityBtn = document.getElementById('env-city-btn');
-    const q3NextBtn = document.getElementById('q3-next-btn');
+    // Q3 페이지 로직 - 다이얼 회전 기능 추가
+    let isQ3Dragging = false;
+    let q3LastAngle = 0;
 
-    envNatureBtn.addEventListener('click', function() {
-      selectEnvironment('nature', this);
-    });
-
-    envCityBtn.addEventListener('click', function() {
-      selectEnvironment('city', this);
-    });
-
-    function selectEnvironment(env, button) {
-      envNatureBtn.classList.remove('selected');
-      envCityBtn.classList.remove('selected');
-      button.classList.add('selected');
-      
-      q3TouchPad.className = 'touch-pad level-2';
-      
-      answers.environment = env;
-      q3NextBtn.classList.remove('disabled');
-      console.log('선택된 환경:', env);
+    function getQ3Angle(clientX, clientY) {
+      const rect = q3Dial.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
     }
 
-    q3NextBtn.addEventListener('click', function() {
+    function normalizeQ3AngleDiff(angle) {
+      while (angle > 180) angle -= 360;
+      while (angle < -180) angle += 360;
+      return angle;
+    }
+
+    function updateQ3Environment(step) {
+      q3EnvironmentStep = step;
+      
+      // 다이얼 회전 각도 설정
+      const rotationAngles = [-45, 0, 45]; // 좌측(-45°), 중앙(0°), 우측(45°)
+      q3DialRotation = rotationAngles[step];
+      q3Dial.style.transform = `rotate(${q3DialRotation}deg)`;
+      
+      if (step === 0) {
+        // 자연 (좌측)
+        q3Emoji.textContent = '⛰️';
+        if (natureAudio) {
+          natureAudio.play();
+        }
+        answers.environment = 'nature';
+        document.getElementById('q3-next-btn').classList.remove('disabled');
+      } else if (step === 2) {
+        // 도시 (우측)
+        q3Emoji.textContent = '🏙️';
+        if (cityAudio) {
+          cityAudio.play();
+        }
+        answers.environment = 'city';
+        document.getElementById('q3-next-btn').classList.remove('disabled');
+      } else {
+        // 중립 (중앙)
+        q3Emoji.textContent = '🏞️';
+        document.getElementById('q3-next-btn').classList.add('disabled');
+      }
+    }
+
+    // Q3 다이얼 드래그 - 회전 각도 기반
+    function startQ3Drag(e) {
+      isQ3Dragging = true;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      q3LastAngle = getQ3Angle(clientX, clientY);
+      e.preventDefault();
+    }
+
+    function moveQ3Drag(e) {
+      if (!isQ3Dragging) return;
+      
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const currentAngle = getQ3Angle(clientX, clientY);
+      
+      const angleDiff = normalizeQ3AngleDiff(currentAngle - q3LastAngle);
+      
+      q3DialRotation += angleDiff;
+      q3DialRotation = Math.max(-45, Math.min(45, q3DialRotation)); // -45도에서 45도 사이
+      
+      // 실시간 다이얼 회전
+      q3Dial.style.transform = `rotate(${q3DialRotation}deg)`;
+      
+      // 단계 결정 (-45~-15: 자연, -15~15: 중립, 15~45: 도시)
+      let newStep;
+      if (q3DialRotation <= -15) {
+        newStep = 0; // 자연
+      } else if (q3DialRotation >= 15) {
+        newStep = 2; // 도시
+      } else {
+        newStep = 1; // 중립
+      }
+      
+      if (newStep !== q3EnvironmentStep) {
+        updateQ3Environment(newStep);
+      }
+      
+      q3LastAngle = currentAngle;
+      e.preventDefault();
+    }
+
+    function endQ3Drag() {
+      if (!isQ3Dragging) return;
+      isQ3Dragging = false;
+      
+      // 스냅 효과: 가장 가까운 단계로 맞춤
+      const snapAngles = [-45, 0, 45];
+      let closestIndex = 0;
+      let minDistance = Math.abs(q3DialRotation - snapAngles[0]);
+      
+      for (let i = 1; i < snapAngles.length; i++) {
+        const distance = Math.abs(q3DialRotation - snapAngles[i]);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestIndex = i;
+        }
+      }
+      
+      q3DialRotation = snapAngles[closestIndex];
+      q3Dial.style.transform = `rotate(${q3DialRotation}deg)`;
+      updateQ3Environment(closestIndex);
+    }
+
+    // Q3 다이얼 이벤트 리스너
+    q3Dial.addEventListener('mousedown', startQ3Drag);
+    document.addEventListener('mousemove', moveQ3Drag);
+    document.addEventListener('mouseup', endQ3Drag);
+
+    q3Dial.addEventListener('touchstart', startQ3Drag, { passive: false });
+    document.addEventListener('touchmove', moveQ3Drag, { passive: false });
+    document.addEventListener('touchend', endQ3Drag);
+
+    // 초기 Q3 상태 설정
+    updateQ3Environment(1); // 중립 상태로 시작
+
+    document.getElementById('q3-next-btn').addEventListener('click', function() {
       if (this.classList.contains('disabled')) return;
       showPage('q4');
     });
 
-    // Q4 페이지 로직 (마음 상태)
+    // Q4 페이지 로직
     const emotionDial = document.getElementById('emotion-dial');
     const emotionTempDisplay = document.getElementById('emotion-temperature-display');
     const q4FinishBtn = document.getElementById('q4-finish-btn');
@@ -1255,11 +1417,9 @@
       const temp = this.value;
       emotionTempDisplay.textContent = temp + '°C';
       answers.emotion = parseInt(temp);
-      console.log('마음 온도:', temp);
     });
 
     q4FinishBtn.addEventListener('click', function() {
-      console.log('모든 답변 완료:', answers);
       showLoading();
     });
 
@@ -1283,38 +1443,9 @@
       showPage('result');
     }
 
-    // HOME 버튼 (처음으로)
+    // HOME 버튼
     document.getElementById('result-home-btn').addEventListener('click', function() {
-      answers = {};
-      touchLevel = 0;
-      selectedWeather = 'clear';
-      q2DialRotation = 0;
-      q2DialStep = 0;
-      
-      nameInput.value = '';
-      startBtn.classList.add('disabled');
-      
-      document.querySelectorAll('.btn').forEach(btn => {
-        btn.classList.remove('selected', 'disabled');
-      });
-      
-      touchPad.className = 'touch-pad level-0';
-      temperatureDisplay.textContent = '36.5°C';
-      
-      document.getElementById('weather-clear-btn').classList.add('selected');
-      q2DraggableDial.className = 'q2-draggable-dial vibration-0';
-      q2DraggableDial.style.setProperty('--rotation', '0deg');
-      waveformPath.className = 'waveform-path level-0';
-      
-      q3TouchPad.className = 'touch-pad level-0';
-      
-      emotionDial.value = 25;
-      emotionTempDisplay.textContent = '25°C';
-      
-      q1NextBtn.classList.add('disabled');
-      q2NextBtn.classList.add('disabled');
-      q3NextBtn.classList.add('disabled');
-      
+      resetAll();
       showPage('start');
     });
 
@@ -1325,7 +1456,6 @@
     });
 
     // 초기화
-    selectedWeather = 'clear';
     updateQ2Vibration();
     console.log('향기 추억 제작소가 시작되었습니다!');
   </script>
