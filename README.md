@@ -2,12 +2,23 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>향기 다이얼 인터페이스</title>
   <style>
     @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-300.css');
     @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-400.css');
     @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-500.css');
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
 
     body {
       height: 100vh; margin: 0; padding: 0;
@@ -15,6 +26,7 @@
       background: #fff;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
       color: #555; user-select: none; overflow: hidden;
+      touch-action: manipulation;
     }
     
     /* 메인 화면 */
@@ -48,6 +60,7 @@
       font-family: 'Pretendard', sans-serif;
       box-shadow: 0 3px 12px rgba(204, 204, 204, 0.3);
       transition: all 0.3s ease;
+      touch-action: manipulation;
     }
     
     #finish-button.active {
@@ -57,7 +70,8 @@
       box-shadow: 0 3px 12px rgba(51, 51, 51, 0.3);
     }
     
-    #finish-button.active:hover {
+    #finish-button.active:hover,
+    #finish-button.active:active {
       background: #222;
       transform: translateX(-50%) translateY(-2px);
       box-shadow: 0 5px 16px rgba(51, 51, 51, 0.4);
@@ -264,9 +278,11 @@
       font-family: 'Pretendard', sans-serif;
       box-shadow: 0 3px 12px rgba(102, 102, 102, 0.3);
       transition: all 0.3s ease;
+      touch-action: manipulation;
     }
     
-    #home-button:hover {
+    #home-button:hover,
+    #home-button:active {
       background: #555;
       transform: translateY(-2px);
       box-shadow: 0 5px 16px rgba(102, 102, 102, 0.4);
@@ -294,6 +310,7 @@
       border-radius: 50%; z-index: 2; cursor: grab; user-select: none; -webkit-user-drag: none;
       object-fit: contain; background: transparent; transition: cursor 0.2s;
       transition: transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
+      touch-action: none;
     }
     .outer-ring:active { cursor: grabbing; }
     .outer-ring.no-transition { transition: none; }
@@ -310,6 +327,7 @@
     .inner-pad {
       position: absolute; top: 22px; left: 22px; width: 276px; height: 276px;
       border-radius: 50%; overflow: hidden; z-index: 3; pointer-events: auto; cursor: pointer; box-sizing: border-box;
+      touch-action: manipulation;
     }
     .inner-bg { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
     .fill-overlay {
@@ -335,6 +353,9 @@
       #page-container {
         flex-direction: column;
         gap: 40px;
+        padding: 20px 10px;
+        overflow-y: auto;
+        height: calc(100vh - 100px);
       }
       .container {
         width: 280px;
@@ -342,6 +363,40 @@
       }
       .guide-text {
         width: 280px;
+        font-size: 13px;
+      }
+      .status-container {
+        width: 280px;
+      }
+      #finish-button {
+        bottom: 20px;
+        padding: 14px 35px;
+        font-size: 18px;
+      }
+      #completion-message {
+        font-size: 16px;
+      }
+      #result-image {
+        max-width: 60%;
+        max-height: 50%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #page-container {
+        gap: 30px;
+        padding: 15px 5px;
+      }
+      .container {
+        width: 250px;
+        height: 250px;
+      }
+      .guide-text {
+        width: 250px;
+        font-size: 12px;
+      }
+      .status-container {
+        width: 250px;
       }
     }
   </style>
@@ -380,7 +435,7 @@
       </div>
       <p id="guide-text-middle" class="guide-text">
         겉면의 다이얼을 돌릴 수 있습니다.<br>
-        터치 패널에 마우스를 갖다대거나 클릭해보세요.
+        터치 패널에 마우스를 갖다대거나 터치해보세요.
       </p>
     </div>
 
@@ -468,6 +523,9 @@
     'https://i.imgur.com/KI2WR6a.png'
   ];
 
+  // 터치 지원 확인
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+
   // UI Management
   function checkFinishCondition() {
     const allMoved = Object.values(dialMoved).every(moved => moved === true);
@@ -544,7 +602,23 @@
   document.getElementById('finish-button').addEventListener('click', showLoadingScreen);
   document.getElementById('home-button').addEventListener('click', showMainScreen);
 
-  // Dial setup (360도 4단계 + 360도 지점 피드백)
+  // 터치 이벤트 지원 함수
+  function getTouchPos(event, container) {
+    const rect = container.getBoundingClientRect();
+    const touch = event.touches ? event.touches[0] : event;
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    return Math.atan2(touch.clientY - centerY, touch.clientX - centerX) * (180 / Math.PI);
+  }
+
+  function getPointerPos(event, container) {
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    return Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+  }
+
+  // Dial setup (터치 지원 추가)
   function setupDial(dialId, { fillSteps, fillType, effect }) {
     const container = document.getElementById(`container-${dialId}`);
     const outerRing = document.getElementById(`outer-ring-${dialId}`);
@@ -558,16 +632,9 @@
     let currentlyDraggedDial = null;
     
     let totalRotation = 0;
-    let lastMouseAngle = 0;
+    let lastAngle = 0;
     let currentStep = 0;
     let initialStep = 0;
-
-    function getMouseAngle(event) {
-      const rect = container.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      return Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
-    }
 
     function normalizeAngleDiff(angle) {
       while (angle > 180) angle -= 360;
@@ -692,6 +759,67 @@
       animationFrame = requestAnimationFrame(animateEffect);
     }
 
+    function startDrag(event) {
+      event.preventDefault();
+      isDragging = true;
+      currentlyDraggedDial = dialId;
+      globalDragState.isDragging = true;
+      globalDragState.dialId = dialId;
+      
+      lastAngle = isTouchDevice ? getTouchPos(event, container) : getPointerPos(event, container);
+      outerRing.classList.add('no-transition');
+
+      if (effect === 'sound' && rainSound.paused) rainSound.play();
+      if (effect === 'vibration') {
+        if (!animationFrame) animationFrame = requestAnimationFrame(animateEffect);
+      }
+    }
+
+    function moveDrag(event) {
+      if (!isDragging || currentlyDraggedDial !== dialId) return;
+      event.preventDefault();
+
+      const currentAngle = isTouchDevice ? getTouchPos(event, container) : getPointerPos(event, container);
+      const angleDiff = normalizeAngleDiff(currentAngle - lastAngle);
+      
+      totalRotation += angleDiff;
+      lastAngle = currentAngle;
+      
+      const newStep = Math.round(totalRotation / 90);
+      const clampedStep = Math.max(0, Math.min(4, newStep));
+      
+      if (clampedStep !== currentStep) {
+        currentStep = clampedStep;
+        updateDialFromStep(true);
+        
+        if (newStep < 0) {
+          totalRotation = 0;
+        } else if (newStep > 4) {
+          totalRotation = 360;
+        }
+      } else {
+        const displayAngle = totalRotation;
+        outerRing.style.transform = `rotate(${displayAngle}deg)`;
+      }
+    }
+
+    function endDrag() {
+      if (isDragging && currentlyDraggedDial === dialId) {
+        isDragging = false;
+        currentlyDraggedDial = null;
+        globalDragState.isDragging = false;
+        globalDragState.dialId = null;
+        
+        if (currentStep === 4) {
+          totalRotation = 360;
+        } else {
+          totalRotation = currentStep * 90;
+        }
+        outerRing.classList.remove('no-transition');
+        updateDialFromStep(true);
+      }
+    }
+
     function reset() {
       isDragging = false;
       currentFill = 0;
@@ -719,65 +847,16 @@
       }
     }
 
-    outerRing.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      isDragging = true; 
-      currentlyDraggedDial = dialId;
-      globalDragState.isDragging = true;
-      globalDragState.dialId = dialId;
-      
-      lastMouseAngle = getMouseAngle(e);
-      outerRing.classList.add('no-transition');
+    // 마우스 이벤트
+    outerRing.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', endDrag);
 
-      if (effect === 'sound' && rainSound.paused) rainSound.play();
-      if (effect === 'vibration') {
-        if (!animationFrame) animationFrame = requestAnimationFrame(animateEffect);
-      }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging || currentlyDraggedDial !== dialId) return;
-
-      const currentMouseAngle = getMouseAngle(e);
-      const angleDiff = normalizeAngleDiff(currentMouseAngle - lastMouseAngle);
-      
-      totalRotation += angleDiff;
-      lastMouseAngle = currentMouseAngle;
-      
-      const newStep = Math.round(totalRotation / 90);
-      const clampedStep = Math.max(0, Math.min(4, newStep));
-      
-      if (clampedStep !== currentStep) {
-        currentStep = clampedStep;
-        updateDialFromStep(true);
-        
-        if (newStep < 0) {
-          totalRotation = 0;
-        } else if (newStep > 4) {
-          totalRotation = 360;
-        }
-      } else {
-        const displayAngle = totalRotation;
-        outerRing.style.transform = `rotate(${displayAngle}deg)`;
-      }
-    });
-
-    window.addEventListener('mouseup', () => {
-      if (isDragging && currentlyDraggedDial === dialId) {
-        isDragging = false; 
-        currentlyDraggedDial = null;
-        globalDragState.isDragging = false;
-        globalDragState.dialId = null;
-        
-        if (currentStep === 4) {
-          totalRotation = 360;
-        } else {
-          totalRotation = currentStep * 90;
-        }
-        outerRing.classList.remove('no-transition');
-        updateDialFromStep(true);
-      }
-    });
+    // 터치 이벤트
+    outerRing.addEventListener('touchstart', startDrag, { passive: false });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', endDrag);
+    window.addEventListener('touchcancel', endDrag);
 
     function updateFill() {
       let gradient, blendMode = 'overlay', filter = 'blur(15px)', color = 'rgba(100, 120, 255, 0.45)';
@@ -800,29 +879,42 @@
       fillOverlay.style.filter = filter;
     }
 
-    innerPad.addEventListener('click', () => {
+    // 내부 패드 클릭/터치 이벤트
+    function handlePadInteraction(event) {
       currentFill = (currentFill < fillSteps) ? currentFill + 1 : 0;
       updateFill();
       if (fadeTimeout) clearTimeout(fadeTimeout);
       fadeTimeout = setTimeout(() => { currentFill = 0; updateFill(); }, 4000);
-    });
+    }
 
+    innerPad.addEventListener('click', handlePadInteraction);
+    innerPad.addEventListener('touchstart', handlePadInteraction);
+
+    // 트레일 효과 (마우스/터치 모두 지원)
     let trailLastTime = 0;
-    innerPad.addEventListener('mousemove', (e) => {
+    function createTrail(event) {
       if (globalDragState.isDragging) return;
       
       const rect = innerPad.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+      const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
       const now = Date.now();
+      
       if (now - trailLastTime > 15) {
         trailLastTime = now;
         const dot = document.createElement('div');
         dot.className = 'trail-dot';
-        dot.style.left = `${x}px`; dot.style.top = `${y}px`;
+        dot.style.left = `${x}px`;
+        dot.style.top = `${y}px`;
         trailContainer.appendChild(dot);
         setTimeout(() => dot.remove(), 1100);
       }
-    });
+    }
+
+    innerPad.addEventListener('mousemove', createTrail);
+    innerPad.addEventListener('touchmove', createTrail, { passive: true });
 
     updateFill();
     if (effect === 'sound') updateSoundBars(0);
