@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Triple Dials with Simple Animation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>향기 다이얼 인터페이스</title>
   <style>
     @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-300.css');
     @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-400.css');
@@ -275,11 +275,11 @@
     .main-content { display: flex; flex-direction: column; align-items: center; position: relative; }
     .status-container {
       width: 320px; height: 30px; margin-bottom: 15px;
-      display: flex; align-items: center; justify-content: center; gap: 3px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .bar {
-      width: 4px; background: #9EA4FF; transition: height 0.2s ease, opacity 0.3s ease;
-      border-radius: 2px; height: 3px; opacity: 0.15;
+      width: 8px; background: #9EA4FF; transition: height 0.2s ease, opacity 0.3s ease;
+      border-radius: 4px; height: 6px; opacity: 0.15;
     }
     #thermometer { font-size: 18px; font-weight: 500; }
     .waveform-svg { width: 80px; height: 30px; }
@@ -329,6 +329,21 @@
       user-select: none; line-height: 1.4; margin: 40px auto 15px auto; visibility: hidden;
     }
     #guide-text-middle { visibility: visible; }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+      #page-container {
+        flex-direction: column;
+        gap: 40px;
+      }
+      .container {
+        width: 280px;
+        height: 280px;
+      }
+      .guide-text {
+        width: 280px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -432,9 +447,7 @@
 <audio id="rain-sound" src="https://actions.google.com/sounds/v1/weather/light_rain.ogg" preload="auto" loop></audio>
 
 <script>
-  // ------------------------
   // Global variables
-  // ------------------------
   const rainSound = document.getElementById('rain-sound');
   rainSound.volume = 0; rainSound.pause();
 
@@ -455,9 +468,7 @@
     'https://i.imgur.com/KI2WR6a.png'
   ];
 
-  // ------------------------
   // UI Management
-  // ------------------------
   function checkFinishCondition() {
     const allMoved = Object.values(dialMoved).every(moved => moved === true);
     const finishButton = document.getElementById('finish-button');
@@ -489,7 +500,7 @@
     
     setTimeout(() => {
       showFinishScreen();
-    }, 2000); // 2초 대기
+    }, 2000);
   }
 
   function showFinishScreen() {
@@ -533,9 +544,7 @@
   document.getElementById('finish-button').addEventListener('click', showLoadingScreen);
   document.getElementById('home-button').addEventListener('click', showMainScreen);
 
-  // ------------------------
   // Dial setup (360도 4단계 + 360도 지점 피드백)
-  // ------------------------
   function setupDial(dialId, { fillSteps, fillType, effect }) {
     const container = document.getElementById(`container-${dialId}`);
     const outerRing = document.getElementById(`outer-ring-${dialId}`);
@@ -548,10 +557,9 @@
     let animationFrame = null;
     let currentlyDraggedDial = null;
     
-    // 360도를 4단계로 나눔 (90도씩) + 360도 지점도 포함
     let totalRotation = 0;
     let lastMouseAngle = 0;
-    let currentStep = 0;  // 기본값 0단계
+    let currentStep = 0;
     let initialStep = 0;
 
     function getMouseAngle(event) {
@@ -581,10 +589,10 @@
       const middleStatus = document.getElementById('status-middle');
       middleStatus.innerHTML = '';
       if (effect === 'sound') {
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 3; i++) {
           const bar = document.createElement('div');
           bar.className = 'bar';
-          bar.style.height = `${3 + i * 2}px`;
+          bar.style.height = `${8 + i * 4}px`;
           bar.style.opacity = i < level ? '1' : '0.15';
           middleStatus.appendChild(bar);
         }
@@ -593,24 +601,22 @@
 
     function updateTemperatureByStep(stepIdx) {
       let temp;
-      if (stepIdx === 0) temp = 36.5;      // 기본값
-      else if (stepIdx === 1) temp = 45.0; // 1단계
-      else if (stepIdx === 2) temp = 55.0; // 2단계  
-      else if (stepIdx === 3) temp = 65.0; // 3단계
+      if (stepIdx === 0) temp = 36.5;
+      else if (stepIdx === 1) temp = 45.0;
+      else if (stepIdx === 2) temp = 55.0;
+      else if (stepIdx === 3) temp = 65.0;
       else temp = 36.5;
       
       document.getElementById('temperature-value').textContent = `${temp.toFixed(1)}°C`;
     }
 
     function updateDialFromStep(triggeredByUser = false) {
-      // 360도를 4단계로 나눔: 0도, 90도, 180도, 270도 + 360도 지점도 포함
       const stepAngles = [0, 90, 180, 270];
       let displayAngle = stepAngles[currentStep] || 0;
       
-      // 360도 지점 처리 (4단계를 넘어가면 360도로 설정)
       if (currentStep >= 4) {
         displayAngle = 360;
-        currentStep = 4; // 360도 지점을 4단계로 설정
+        currentStep = 4;
       }
       
       outerRing.style.transform = `rotate(${displayAngle}deg)`;
@@ -625,12 +631,11 @@
       }
 
       if (effect === 'sound') {
-        // 4단계로 나누기: 0단계=0바, 1단계=2바, 2단계=5바, 3단계=8바
         let level;
-        if (currentStep === 0) level = 0;      // 소리 없음
-        else if (currentStep === 1) level = 2; // 약한 소리
-        else if (currentStep === 2) level = 5; // 중간 소리
-        else if (currentStep === 3 || currentStep === 4) level = 8; // 강한 소리
+        if (currentStep === 0) level = 0;
+        else if (currentStep === 1) level = 1;
+        else if (currentStep === 2) level = 2;
+        else if (currentStep === 3 || currentStep === 4) level = 3;
         else level = 0;
         
         rainSound.volume = Math.min(1, Math.max(0, currentStep / 3));
@@ -642,12 +647,11 @@
     }
 
     function animateEffect(time) {
-      // 왼쪽 다이얼: 4단계 진동
       let amplitude;
-      if (currentStep === 0) amplitude = 0;       // 진동 없음
-      else if (currentStep === 1) amplitude = 3;  // 약한 진동
-      else if (currentStep === 2) amplitude = 7;  // 중간 진동
-      else if (currentStep === 3 || currentStep === 4) amplitude = 12; // 강한 진동
+      if (currentStep === 0) amplitude = 0;
+      else if (currentStep === 1) amplitude = 3;
+      else if (currentStep === 2) amplitude = 7;
+      else if (currentStep === 3 || currentStep === 4) amplitude = 12;
       else amplitude = 0;
       
       if (effect === 'vibration') {
@@ -655,31 +659,26 @@
         const vibY = Math.sin(time / 15) * amplitude * 0.7;
         container.style.transform = `translate(${vibX}px, ${vibY}px)`;
         
-        // 파형도 4단계로 명확히 구분
         const path = document.getElementById('waveform-path-left');
         if (path) {
           const width = 80, height = 30;
           let d = `M 0 ${height/2}`;
           
           if (currentStep === 0) {
-            // 0단계: 평직선
             d = `M 0 ${height/2} L ${width} ${height/2}`;
           } else if (currentStep === 1) {
-            // 1단계: 작은 파형
             const freq = 3;
             for (let x = 0; x <= width; x++) {
               const yOff = Math.sin(time/180 + (x/width)*Math.PI*freq) * 2;
               d += ` L ${x} ${height/2 + yOff}`;
             }
           } else if (currentStep === 2) {
-            // 2단계: 중간 파형
             const freq = 5;
             for (let x = 0; x <= width; x++) {
               const yOff = Math.sin(time/120 + (x/width)*Math.PI*freq) * 5;
               d += ` L ${x} ${height/2 + yOff}`;
             }
           } else if (currentStep === 3 || currentStep === 4) {
-            // 3단계: 큰 파형
             const freq = 7;
             for (let x = 0; x <= width; x++) {
               const yOff = Math.sin(time/80 + (x/width)*Math.PI*freq) * 10;
@@ -702,7 +701,6 @@
         animationFrame = null;
       }
       
-      // 모든 다이얼 0단계에서 시작
       totalRotation = 0;
       currentStep = 0;
       initialStep = 0;
@@ -713,7 +711,6 @@
       updateFill();
       trailContainer.innerHTML = '';
       
-      // 파형 초기화
       if (effect === 'vibration') {
         const path = document.getElementById('waveform-path-left');
         if (path) {
@@ -747,22 +744,19 @@
       totalRotation += angleDiff;
       lastMouseAngle = currentMouseAngle;
       
-      // 360도를 4단계로 나눔 (90도씩) + 360도 지점 포함
       const newStep = Math.round(totalRotation / 90);
-      const clampedStep = Math.max(0, Math.min(4, newStep)); // 0~4단계 (360도 포함)
+      const clampedStep = Math.max(0, Math.min(4, newStep));
       
       if (clampedStep !== currentStep) {
         currentStep = clampedStep;
-        updateDialFromStep(true); // 단계 변경 시 피드백
+        updateDialFromStep(true);
         
-        // 범위 제한
         if (newStep < 0) {
           totalRotation = 0;
         } else if (newStep > 4) {
-          totalRotation = 360; // 360도까지
+          totalRotation = 360;
         }
       } else {
-        // 스텝 사이의 자유 회전
         const displayAngle = totalRotation;
         outerRing.style.transform = `rotate(${displayAngle}deg)`;
       }
@@ -776,12 +770,12 @@
         globalDragState.dialId = null;
         
         if (currentStep === 4) {
-          totalRotation = 360; // 360도 지점
+          totalRotation = 360;
         } else {
           totalRotation = currentStep * 90;
         }
         outerRing.classList.remove('no-transition');
-        updateDialFromStep(true); // 마우스 업에서도 피드백
+        updateDialFromStep(true);
       }
     });
 
@@ -844,7 +838,6 @@
   setupDial('right',  { fillSteps: 7, fillType: 'circle-out',effect: 'temperature' });
 
   checkFinishCondition();
-
 </script>
 </body>
 </html>
