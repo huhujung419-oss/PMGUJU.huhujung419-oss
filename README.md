@@ -599,27 +599,7 @@
   document.getElementById('finish-button').addEventListener('click', showLoadingScreen);
   document.getElementById('home-button').addEventListener('click', showMainScreen);
 
-  // 이벤트 좌표 추출 함수 (마우스/터치 통합)
-  function getEventPos(event) {
-    if (event.touches && event.touches.length > 0) {
-      return { x: event.touches[0].clientX, y: event.touches[0].clientY };
-    } else if (event.changedTouches && event.changedTouches.length > 0) {
-      return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
-    } else {
-      return { x: event.clientX, y: event.clientY };
-    }
-  }
-
-  // 각도 계산 함수
-  function getAngleFromCenter(event, container) {
-    const pos = getEventPos(event);
-    const rect = container.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    return Math.atan2(pos.y - centerY, pos.x - centerX) * (180 / Math.PI);
-  }
-
-  // Dial setup (터치/마우스 통합 처리)
+  // Dial setup - 완전히 새로 작성한 터치 지원 버전
   function setupDial(dialId, { fillSteps, fillType, effect }) {
     const container = document.getElementById(`container-${dialId}`);
     const outerRing = document.getElementById(`outer-ring-${dialId}`);
@@ -636,6 +616,14 @@
     let lastAngle = 0;
     let currentStep = 0;
     let initialStep = 0;
+
+    // 각도 계산 함수 - 개선된 버전
+    function getAngle(clientX, clientY) {
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+    }
 
     function normalizeAngleDiff(angle) {
       while (angle > 180) angle -= 360;
@@ -760,14 +748,18 @@
       animationFrame = requestAnimationFrame(animateEffect);
     }
 
-    function startDrag(event) {
-      event.preventDefault();
+    function startDrag(e) {
+      e.preventDefault();
       isDragging = true;
       currentlyDraggedDial = dialId;
       globalDragState.isDragging = true;
       globalDragState.dialId = dialId;
       
-      lastAngle = getAngleFromCenter(event, container);
+      // 터치/마우스 좌표 처리
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      lastAngle = getAngle(clientX, clientY);
+      
       outerRing.classList.add('no-transition');
 
       if (effect === 'sound' && rainSound.paused) rainSound.play();
@@ -776,13 +768,16 @@
       }
     }
 
-    function moveDrag(event) {
+    function moveDrag(e) {
       if (!isDragging || currentlyDraggedDial !== dialId) return;
-      event.preventDefault();
+      e.preventDefault();
 
-      const currentAngle = getAngleFromCenter(event, container);
-      const angleDiff = normalizeAngleDiff(currentAngle - lastAngle);
+      // 터치/마우스 좌표 처리
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const currentAngle = getAngle(clientX, clientY);
       
+      const angleDiff = normalizeAngleDiff(currentAngle - lastAngle);
       totalRotation += angleDiff;
       lastAngle = currentAngle;
       
@@ -821,6 +816,17 @@
       }
     }
 
+    // 이벤트 리스너 등록 - 마우스
+    outerRing.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('mouseup', endDrag);
+
+    // 이벤트 리스너 등록 - 터치
+    outerRing.addEventListener('touchstart', startDrag, { passive: false });
+    document.addEventListener('touchmove', moveDrag, { passive: false });
+    document.addEventListener('touchend', endDrag);
+    document.addEventListener('touchcancel', endDrag);
+
     function reset() {
       isDragging = false;
       currentFill = 0;
@@ -848,17 +854,6 @@
       }
     }
 
-    // 통합 이벤트 리스너 (마우스/터치)
-    outerRing.addEventListener('mousedown', startDrag);
-    outerRing.addEventListener('touchstart', startDrag, { passive: false });
-    
-    document.addEventListener('mousemove', moveDrag);
-    document.addEventListener('touchmove', moveDrag, { passive: false });
-    
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-    document.addEventListener('touchcancel', endDrag);
-
     function updateFill() {
       let gradient, blendMode = 'overlay', filter = 'blur(15px)', color = 'rgba(100, 120, 255, 0.45)';
       if (currentFill === 0) gradient = 'none';
@@ -880,8 +875,8 @@
       fillOverlay.style.filter = filter;
     }
 
-    // 내부 패드 클릭/터치 (통합)
-    function handlePadClick(event) {
+    // 내부 패드 클릭/터치
+    function handlePadClick(e) {
       currentFill = (currentFill < fillSteps) ? currentFill + 1 : 0;
       updateFill();
       if (fadeTimeout) clearTimeout(fadeTimeout);
@@ -891,15 +886,16 @@
     innerPad.addEventListener('click', handlePadClick);
     innerPad.addEventListener('touchstart', handlePadClick);
 
-    // 트레일 효과 (마우스/터치 통합)
+    // 트레일 효과
     let trailLastTime = 0;
-    function createTrail(event) {
+    function createTrail(e) {
       if (globalDragState.isDragging) return;
       
-      const pos = getEventPos(event);
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       const rect = innerPad.getBoundingClientRect();
-      const x = pos.x - rect.left;
-      const y = pos.y - rect.top;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
       const now = Date.now();
       
       if (now - trailLastTime > 15) {
