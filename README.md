@@ -523,9 +523,6 @@
     'https://i.imgur.com/KI2WR6a.png'
   ];
 
-  // 터치 지원 확인
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
-
   // UI Management
   function checkFinishCondition() {
     const allMoved = Object.values(dialMoved).every(moved => moved === true);
@@ -602,23 +599,27 @@
   document.getElementById('finish-button').addEventListener('click', showLoadingScreen);
   document.getElementById('home-button').addEventListener('click', showMainScreen);
 
-  // 터치 이벤트 지원 함수
-  function getTouchPos(event, container) {
-    const rect = container.getBoundingClientRect();
-    const touch = event.touches ? event.touches[0] : event;
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    return Math.atan2(touch.clientY - centerY, touch.clientX - centerX) * (180 / Math.PI);
+  // 이벤트 좌표 추출 함수 (마우스/터치 통합)
+  function getEventPos(event) {
+    if (event.touches && event.touches.length > 0) {
+      return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    } else if (event.changedTouches && event.changedTouches.length > 0) {
+      return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+    } else {
+      return { x: event.clientX, y: event.clientY };
+    }
   }
 
-  function getPointerPos(event, container) {
+  // 각도 계산 함수
+  function getAngleFromCenter(event, container) {
+    const pos = getEventPos(event);
     const rect = container.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    return Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+    return Math.atan2(pos.y - centerY, pos.x - centerX) * (180 / Math.PI);
   }
 
-  // Dial setup (터치 지원 추가)
+  // Dial setup (터치/마우스 통합 처리)
   function setupDial(dialId, { fillSteps, fillType, effect }) {
     const container = document.getElementById(`container-${dialId}`);
     const outerRing = document.getElementById(`outer-ring-${dialId}`);
@@ -766,7 +767,7 @@
       globalDragState.isDragging = true;
       globalDragState.dialId = dialId;
       
-      lastAngle = isTouchDevice ? getTouchPos(event, container) : getPointerPos(event, container);
+      lastAngle = getAngleFromCenter(event, container);
       outerRing.classList.add('no-transition');
 
       if (effect === 'sound' && rainSound.paused) rainSound.play();
@@ -779,7 +780,7 @@
       if (!isDragging || currentlyDraggedDial !== dialId) return;
       event.preventDefault();
 
-      const currentAngle = isTouchDevice ? getTouchPos(event, container) : getPointerPos(event, container);
+      const currentAngle = getAngleFromCenter(event, container);
       const angleDiff = normalizeAngleDiff(currentAngle - lastAngle);
       
       totalRotation += angleDiff;
@@ -847,16 +848,16 @@
       }
     }
 
-    // 마우스 이벤트
+    // 통합 이벤트 리스너 (마우스/터치)
     outerRing.addEventListener('mousedown', startDrag);
-    window.addEventListener('mousemove', moveDrag);
-    window.addEventListener('mouseup', endDrag);
-
-    // 터치 이벤트
     outerRing.addEventListener('touchstart', startDrag, { passive: false });
-    window.addEventListener('touchmove', moveDrag, { passive: false });
-    window.addEventListener('touchend', endDrag);
-    window.addEventListener('touchcancel', endDrag);
+    
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('touchmove', moveDrag, { passive: false });
+    
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+    document.addEventListener('touchcancel', endDrag);
 
     function updateFill() {
       let gradient, blendMode = 'overlay', filter = 'blur(15px)', color = 'rgba(100, 120, 255, 0.45)';
@@ -879,27 +880,26 @@
       fillOverlay.style.filter = filter;
     }
 
-    // 내부 패드 클릭/터치 이벤트
-    function handlePadInteraction(event) {
+    // 내부 패드 클릭/터치 (통합)
+    function handlePadClick(event) {
       currentFill = (currentFill < fillSteps) ? currentFill + 1 : 0;
       updateFill();
       if (fadeTimeout) clearTimeout(fadeTimeout);
       fadeTimeout = setTimeout(() => { currentFill = 0; updateFill(); }, 4000);
     }
 
-    innerPad.addEventListener('click', handlePadInteraction);
-    innerPad.addEventListener('touchstart', handlePadInteraction);
+    innerPad.addEventListener('click', handlePadClick);
+    innerPad.addEventListener('touchstart', handlePadClick);
 
-    // 트레일 효과 (마우스/터치 모두 지원)
+    // 트레일 효과 (마우스/터치 통합)
     let trailLastTime = 0;
     function createTrail(event) {
       if (globalDragState.isDragging) return;
       
+      const pos = getEventPos(event);
       const rect = innerPad.getBoundingClientRect();
-      const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-      const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
+      const x = pos.x - rect.left;
+      const y = pos.y - rect.top;
       const now = Date.now();
       
       if (now - trailLastTime > 15) {
