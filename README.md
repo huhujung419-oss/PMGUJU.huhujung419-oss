@@ -1,4 +1,3 @@
-# huhujung419-oss.githib.io
 <!DOCTYPE html>
 <html lang="ko">
 <head>
