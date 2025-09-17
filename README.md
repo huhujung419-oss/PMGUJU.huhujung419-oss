@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>향기 다이얼 인터페이스</title>
+  <title>향기 추억 제작소</title>
   <style>
-    @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-300.css');
-    @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-400.css');
-    @import url('https://cdn.jsdelivr.net/npm/@fontsource/pretendard@latest/latin-500.css');
-
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+    
     * {
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
@@ -18,914 +15,1319 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      box-sizing: border-box;
     }
 
     body {
-      height: 100vh; margin: 0; padding: 0;
-      display: flex; justify-content: center; align-items: center;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       background: #fff;
-      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
-      color: #555; user-select: none; overflow: hidden;
-      touch-action: manipulation;
+      color: #333;
+      overflow-x: hidden;
     }
-    
-    /* 메인 화면 */
-    #main-screen {
+
+    .page {
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page.hidden {
+      display: none;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* BACK 버튼 - 좌측 상단 고정 */
+    .btn-back {
+      position: fixed !important;
+      top: 20px !important;
+      left: 20px !important;
+      background: white !important;
+      color: #666 !important;
+      font-size: 12px !important;
+      padding: 6px 12px !important;
+      font-weight: 600 !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+      border-radius: 15px !important;
+      z-index: 9999 !important;
+      border: none !important;
+      cursor: pointer !important;
+      text-transform: uppercase !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .btn-back:hover {
+      color: #444 !important;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25) !important;
+    }
+
+    /* 통일된 질문 위치 - 페이지 상단 고정 */
+    .question-area {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .question-number {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 10px;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    .question-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+      line-height: 1.4;
+      margin: 0;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    .question-subtitle {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.4;
+      font-family: 'Pretendard', sans-serif;
+      margin: 10px 0 0 0;
+    }
+
+    /* 통일된 다이얼 위치 - 페이지 중앙 고정 */
+    .dial-area {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 350px;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    /* 다이얼 배경 이미지 */
+    .dial-background {
+      position: absolute;
+      width: 350px;
+      height: 350px;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* 터치패드 */
+    .touch-pad {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      background: url('https://i.imgur.com/FTZhg6Z.png') no-repeat center center;
+      background-size: cover;
+      overflow: hidden;
+    }
+
+    /* 터치패드 색상 오버레이 - 중앙에서 채워짐 */
+    .touch-pad::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, transparent 0%, transparent 100%);
+      transition: all 0.4s ease;
+      z-index: 1;
+    }
+
+    .touch-pad.level-0::before {
+      background: radial-gradient(circle, transparent 0%, transparent 100%);
+    }
+
+    .touch-pad.level-1::before {
+      background: radial-gradient(circle, rgba(153, 163, 255, 0.3) 0%, rgba(153, 163, 255, 0.1) 30%, transparent 50%);
+    }
+
+    .touch-pad.level-2::before {
+      background: radial-gradient(circle, rgba(153, 163, 255, 0.5) 0%, rgba(153, 163, 255, 0.2) 60%, transparent 75%);
+    }
+
+    .touch-pad.level-3::before {
+      background: radial-gradient(circle, rgba(153, 163, 255, 0.7) 0%, rgba(153, 163, 255, 0.3) 80%, transparent 90%);
+    }
+
+    /* Q1 온도 디스플레이 - LED 효과 (하얗고 뿌옇게) */
+    .temperature-display {
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+      font-family: 'Pretendard', sans-serif;
+      z-index: 3;
+      position: relative;
+      letter-spacing: 0.5px;
+    }
+
+    /* 터치 리플 효과 */
+    .touch-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    @keyframes ripple {
+      to {
+        transform: scale(3);
+        opacity: 0;
+      }
+    }
+
+    /* 통일된 NEXT 버튼 위치 - 페이지 하단 고정 */
+    .button-area {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    /* NEXT 버튼 - 검은색 배경, 흰색 글씨, 크기 축소, PRETENDARD BOLD */
+    .btn-next {
+      background: #000 !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+      font-family: 'Pretendard', sans-serif !important;
+      font-size: 14px !important;
+      padding: 8px 20px !important;
+      border-radius: 18px !important;
+      width: auto !important;
+      min-width: 80px !important;
+      max-width: 100px !important;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3) !important;
+      text-transform: uppercase !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+      border: none !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    .btn-next:hover:not(.disabled) {
+      background: #222 !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+    }
+
+    .btn-next:active {
+      transform: translateY(0px) !important;
+    }
+
+    .btn-next.disabled {
+      background: #555 !important;
+      color: #aaa !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    /* START 페이지 */
+    .start-page {
+      background: linear-gradient(135deg, #f8f9ff 0%, #fff 50%, #f0f2ff 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 100%;
-      height: 100%;
+      padding: 40px 20px;
     }
-    
-    #page-container {
-      display: flex; justify-content: center; align-items: center; gap: 80px;
+
+    .start-header {
+      text-align: center;
+      margin-bottom: 60px;
     }
-    
-    /* Finish 버튼 */
-    #finish-button {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 30px;
-      background: #ccc;
-      color: #888;
-      border: none;
-      border-radius: 20px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: not-allowed;
-      font-family: 'Pretendard', sans-serif;
-      box-shadow: 0 3px 12px rgba(204, 204, 204, 0.3);
-      transition: all 0.3s ease;
-      touch-action: manipulation;
-    }
-    
-    #finish-button.active {
-      background: #333;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 3px 12px rgba(51, 51, 51, 0.3);
-    }
-    
-    #finish-button.active:hover,
-    #finish-button.active:active {
-      background: #222;
-      transform: translateX(-50%) translateY(-2px);
-      box-shadow: 0 5px 16px rgba(51, 51, 51, 0.4);
-    }
-    
-    /* 로딩 화면 */
-    #loading-screen {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      background: #fff;
-    }
-    
-    #loading-text {
-      font-size: 16px;
+
+    .start-title {
+      font-size: 28px;
       font-weight: 500;
+      color: #333;
+      line-height: 1.4;
+      margin: 0 0 20px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .start-subtitle {
+      font-size: 16px;
+      font-weight: 400;
       color: #666;
-      margin-bottom: 40px;
+      line-height: 1.5;
+      margin: 0;
     }
-    
-    /* 흰 화면 */
-    #white-screen {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      background: #fff;
+
+    .input-section {
+      margin-bottom: 80px;
     }
-    
-    /* 3D 프린팅스러운 애니메이션 */
-    .printer-container {
-      width: 200px;
-      height: 180px;
+
+    .input-container {
       position: relative;
+      width: 300px;
     }
-    
-    /* 흑백 스타일 아이콘들 - 음영 없는 미니멀 스타일 */
-    .floating-icon {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      user-select: none;
-      pointer-events: none;
-      filter: grayscale(1) contrast(1.2);
-      opacity: 0.7;
+
+    .name-input {
+      width: 100%;
+      padding: 15px 5px;
+      font-size: 18px;
+      font-weight: 400;
+      color: #333;
+      background: transparent;
+      border: none;
+      outline: none;
+      text-align: center;
+      font-family: 'Pretendard', sans-serif;
     }
-    
-    .planet-icon {
-      top: 40px;
-      left: 60px;
-      animation: float-1 3s ease-in-out infinite;
+
+    .name-input::placeholder {
+      color: #aaa;
+      font-weight: 300;
     }
-    
-    .rocket-icon {
-      top: 80px;
-      right: 50px;
-      animation: float-2 2.8s ease-in-out infinite 0.5s;
-    }
-    
-    .star-icon {
-      top: 120px;
-      left: 50px;
-      animation: float-3 2.5s ease-in-out infinite 1s;
-    }
-    
-    @keyframes float-1 {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-8px) rotate(5deg); }
-    }
-    
-    @keyframes float-2 {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(8deg); }
-    }
-    
-    @keyframes float-3 {
-      0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
-      50% { transform: translateY(-6px) rotate(-5deg) scale(1.1); }
-    }
-    
-    /* 노즐: 3D 프린팅처럼 레이어별로 움직임 */
-    .printer-nozzle {
-      width: 8px;
-      height: 12px;
-      background: #333;
-      position: absolute;
-      top: 120px;
-      left: 96px;
-      border-radius: 0 0 4px 4px;
-      animation: nozzle-3d-printing 5s ease-in-out;
-    }
-    
-    .printer-nozzle::before {
-      content: '';
-      position: absolute;
-      top: -6px;
-      left: -4px;
-      width: 16px;
-      height: 6px;
-      background: #555;
-      border-radius: 8px;
-    }
-    
-    /* 병 형태 - 새로운 색상 */
-    .bottle-container {
-      position: absolute;
-      bottom: 40px;
-      left: 85px;
-      width: 30px;
-      height: 80px;
-    }
-    
-    .bottle-shape {
+
+    .input-line {
       position: absolute;
       bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #ddd;
+      transition: all 0.3s ease;
+    }
+
+    .input-container:focus-within .input-line {
+      background: #9EA4FF;
+      transform: scaleY(1.5);
+    }
+
+    .btn {
+      font-family: 'Pretendard', sans-serif;
+      font-weight: 600;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      touch-action: manipulation;
+      outline: none;
+      padding: 16px 40px;
+      font-size: 18px;
+      background: #333;
+      color: white;
+      box-shadow: 0 4px 15px rgba(51, 51, 51, 0.2);
+    }
+
+    .btn:hover:not(.disabled) {
+      background: #222;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(51, 51, 51, 0.3);
+    }
+
+    .btn.disabled {
+      background: #ccc !important;
+      color: #888 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .btn-secondary {
+      background: #9EA4FF;
+      box-shadow: 0 4px 15px rgba(158, 164, 255, 0.2);
+    }
+
+    .btn-secondary:hover:not(.disabled) {
+      background: #8A91FF;
+      box-shadow: 0 6px 20px rgba(158, 164, 255, 0.3);
+    }
+
+    /* 페이지별 배경 */
+    .q1-page {
+      background: linear-gradient(135deg, #fff8f0 0%, #fff 50%, #f0f8ff 100%);
+    }
+
+    .q2-page {
+      background: linear-gradient(135deg, #f0fff4 0%, #fff 50%, #f8fff8 100%);
+    }
+
+    .q3-page {
+      background: linear-gradient(135deg, #f0f8ff 0%, #fff 50%, #e6f3ff 100%);
+    }
+
+    .q4-page {
+      background: linear-gradient(135deg, #fff0f5 0%, #fff 50%, #fdf0f8 100%);
+    }
+
+    /* Q2 날씨 선택 영역 */
+    .weather-area {
+      position: absolute;
+      top: 140px;
       left: 50%;
       transform: translateX(-50%);
-      width: 28px;
-      height: 0;
-      background: #ACB1FF;
-      border-radius: 0 0 14px 14px;
-      animation: bottle-build 5s ease-out;
+      z-index: 10;
     }
-    
-    /* 3D 프린팅처럼 레이어별로 노즐 움직임 */
-    @keyframes nozzle-3d-printing {
-      0% { top: 120px; left: 85px; }
-      5% { top: 120px; left: 107px; }
-      10% { top: 120px; left: 85px; }
-      15% { top: 115px; left: 107px; }
-      20% { top: 110px; left: 85px; }
-      25% { top: 105px; left: 107px; }
-      30% { top: 100px; left: 85px; }
-      35% { top: 95px; left: 107px; }
-      40% { top: 90px; left: 85px; }
-      45% { top: 85px; left: 107px; }
-      50% { top: 80px; left: 85px; }
-      55% { top: 75px; left: 107px; }
-      60% { top: 70px; left: 85px; }
-      65% { top: 65px; left: 107px; }
-      70% { top: 60px; left: 85px; }
-      75% { top: 55px; left: 107px; }
-      80% { top: 50px; left: 85px; }
-      85% { top: 45px; left: 107px; }
-      90% { top: 40px; left: 85px; }
-      95% { top: 35px; left: 107px; }
-      100% { top: 30px; left: 96px; }
-    }
-    
-    @keyframes bottle-build {
-      0%, 15% { height: 0; }
-      25% { height: 12px; }
-      40% { height: 28px; }
-      55% { height: 45px; }
-      70% { height: 58px; }
-      85% { height: 68px; }
-      100% { height: 75px; }
-    }
-    
-    /* 완료 화면 */
-    #finish-screen {
-      display: none;
-      flex-direction: column;
+
+    .weather-buttons {
+      display: flex;
       justify-content: center;
-      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .weather-btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 25px;
+      background: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Pretendard', sans-serif;
+      font-weight: 500;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .weather-btn:hover {
+      color: #5A67D8;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .weather-btn.selected::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      background: #5A67D8;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(90, 103, 216, 0.3);
+    }
+
+    /* Q2 다이얼 진동 효과 */
+    .q2-draggable-dial {
+      position: absolute;
+      width: 350px;
+      height: 350px;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-drag: none;
+      transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+      transform-origin: center center;
+      z-index: 2;
+    }
+
+    .q2-draggable-dial:active {
+      cursor: grabbing;
+    }
+
+    .q2-draggable-dial.no-transition {
+      transition: none;
+    }
+
+    .q2-draggable-dial.vibration-0 {
+      animation: none;
+    }
+
+    .q2-draggable-dial.vibration-1 {
+      animation: vibrate-1 0.1s infinite;
+    }
+
+    .q2-draggable-dial.vibration-2 {
+      animation: vibrate-2 0.08s infinite;
+    }
+
+    .q2-draggable-dial.vibration-3 {
+      animation: vibrate-3 0.06s infinite;
+    }
+
+    @keyframes vibrate-1 {
+      0%, 100% { transform: rotate(var(--rotation, 0deg)) translate(0px, 0px); }
+      25% { transform: rotate(var(--rotation, 0deg)) translate(0.5px, 0.5px); }
+      50% { transform: rotate(var(--rotation, 0deg)) translate(-0.5px, 0px); }
+      75% { transform: rotate(var(--rotation, 0deg)) translate(0px, -0.5px); }
+    }
+
+    @keyframes vibrate-2 {
+      0%, 100% { transform: rotate(var(--rotation, 0deg)) translate(0px, 0px); }
+      25% { transform: rotate(var(--rotation, 0deg)) translate(1px, 1px); }
+      50% { transform: rotate(var(--rotation, 0deg)) translate(-1px, 0px); }
+      75% { transform: rotate(var(--rotation, 0deg)) translate(0px, -1px); }
+    }
+
+    @keyframes vibrate-3 {
+      0%, 100% { transform: rotate(var(--rotation, 0deg)) translate(0px, 0px); }
+      20% { transform: rotate(var(--rotation, 0deg)) translate(1.5px, 1.5px); }
+      40% { transform: rotate(var(--rotation, 0deg)) translate(-1.5px, 1px); }
+      60% { transform: rotate(var(--rotation, 0deg)) translate(1px, -1.5px); }
+      80% { transform: rotate(var(--rotation, 0deg)) translate(-1px, -1px); }
+    }
+
+    /* Q2 터치패드 배경 */
+    .q2-touch-pad {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      z-index: 1;
+      background: url('https://i.imgur.com/FTZhg6Z.png') no-repeat center center;
+      background-size: cover;
+      pointer-events: none;
+    }
+
+    /* 파형 진동 바 */
+    .waveform-container {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      width: 200px;
+      height: 30px;
+    }
+
+    .waveform-svg {
       width: 100%;
       height: 100%;
-      background: #fff;
-      padding: 40px;
-      box-sizing: border-box;
     }
-    
-    #result-image {
-      max-width: 40%;
-      max-height: 35%;
-      object-fit: contain;
-      margin-bottom: 20px;
-      border-radius: 10px;
+
+    .waveform-path {
+      stroke: #9EA4FF;
+      stroke-width: 2;
+      fill: none;
+      transition: stroke 0.3s ease;
     }
-    
-    /* 완성 메시지 */
-    #completion-message {
-      font-size: 18px;
-      font-weight: 500;
-      color: #555;
-      margin-bottom: 25px;
+
+    .waveform-path.level-0 {
+      stroke: #ddd;
+      opacity: 0.3;
+    }
+
+    .waveform-path.level-1 {
+      stroke: #9EA4FF;
+      opacity: 0.6;
+    }
+
+    .waveform-path.level-2 {
+      stroke: #7B83FF;
+      opacity: 0.8;
+    }
+
+    .waveform-path.level-3 {
+      stroke: #5A67D8;
+      opacity: 1.0;
+    }
+
+    /* Q3, Q4 추가 선택 영역 */
+    .selection-area {
+      position: absolute;
+      bottom: 200px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 30px;
+      z-index: 10;
+    }
+
+    /* Q4 감정 다이얼 */
+    .emotion-dial-area {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       text-align: center;
+      z-index: 10;
     }
-    
-    #home-button {
-      padding: 12px 30px;
-      background: #666;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      font-size: 16px;
+
+    .emotion-display {
+      font-size: 32px;
       font-weight: 600;
-      cursor: pointer;
+      color: #d2691e;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
       font-family: 'Pretendard', sans-serif;
-      box-shadow: 0 3px 12px rgba(102, 102, 102, 0.3);
-      transition: all 0.3s ease;
-      touch-action: manipulation;
-    }
-    
-    #home-button:hover,
-    #home-button:active {
-      background: #555;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 16px rgba(102, 102, 102, 0.4);
     }
 
-    .main-content { display: flex; flex-direction: column; align-items: center; position: relative; }
-    .status-container {
-      width: 320px; height: 30px; margin-bottom: 15px;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+    .dial-control {
+      width: 250px;
+      height: 100px;
+      margin: 0 auto;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .bar {
-      width: 8px; background: #9EA4FF; transition: height 0.2s ease, opacity 0.3s ease;
-      border-radius: 4px; height: 6px; opacity: 0.15;
-    }
-    #thermometer { font-size: 18px; font-weight: 500; }
-    .waveform-svg { width: 80px; height: 30px; }
-    .waveform-path { stroke: #888; stroke-width: 2; fill: none; transition: d 0.1s linear; }
 
-    .container {
-      position: relative; width: 320px; height: 320px; margin: 0 auto; user-select: none;
-      transition: transform 0.5s ease-out;
+    .dial-input {
+      width: 200px;
+      height: 8px;
+      background: #ddd;
+      border-radius: 5px;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
     }
-    .outer-ring {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      border-radius: 50%; z-index: 2; cursor: grab; user-select: none; -webkit-user-drag: none;
-      object-fit: contain; background: transparent; transition: cursor 0.2s;
-      transition: transform 0.1s cubic-bezier(0.4, 0.0, 0.2, 1);
-      touch-action: none;
-    }
-    .outer-ring:active { cursor: grabbing; }
-    .outer-ring.no-transition { transition: none; }
-    .outer-ring.feedback-pulse { 
-      animation: detent-pulse 200ms ease-out;
-    }
-    
-    @keyframes detent-pulse {
-      0% { transform: scale(1) rotate(var(--current-rotation)); }
-      30% { transform: scale(0.99) rotate(var(--current-rotation)); }
-      100% { transform: scale(1) rotate(var(--current-rotation)); }
-    }
-    
-    .inner-pad {
-      position: absolute; top: 22px; left: 22px; width: 276px; height: 276px;
-      border-radius: 50%; overflow: hidden; z-index: 3; pointer-events: auto; cursor: pointer; box-sizing: border-box;
-      touch-action: manipulation;
-    }
-    .inner-bg { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
-    .fill-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 5; transition: all 0.5s ease-out; background: var(--fill-gradient);
-    }
-    .trail-container { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-    .trail-dot {
-      position: absolute; border-radius: 50%; background-color: rgba(158,164,255,0.13); pointer-events: none;
-      opacity: 1; animation: dot-fade 1.1s cubic-bezier(0.5,1,0.7,1) forwards;
-      filter: blur(15px); transform: translate(-50%, -50%); width: 50px; height: 50px; will-change: filter, opacity;
-    }
-    @keyframes dot-fade { to { opacity: 0; } }
 
-    .guide-text {
-      width: 320px; font-weight: 500; text-align: center; font-size: 14px; color: #555;
-      user-select: none; line-height: 1.4; margin: 40px auto 15px auto; visibility: hidden;
+    .dial-input::-webkit-slider-thumb {
+      width: 25px;
+      height: 25px;
+      background: #9EA4FF;
+      border-radius: 50%;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      box-shadow: 0 2px 6px rgba(158, 164, 255, 0.3);
     }
-    #guide-text-middle { visibility: visible; }
+
+    .dial-input::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      background: #9EA4FF;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(158, 164, 255, 0.3);
+    }
+
+    /* 로딩 페이지 */
+    .loading-page {
+      background: linear-gradient(135deg, #f8f9ff 0%, #fff 50%, #f0f2ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-text {
+      font-size: 24px;
+      font-weight: 500;
+      color: #666;
+      text-align: center;
+      animation: pulse 2s ease-in-out infinite;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* 결과 페이지 */
+    .result-page {
+      background: linear-gradient(135deg, #fff8f0 0%, #fff 50%, #f0f8ff 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .result-message {
+      font-size: 24px;
+      font-weight: 500;
+      color: #333;
+      text-align: center;
+      margin-bottom: 40px;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    .result-image-container {
+      margin-bottom: 40px;
+    }
+
+    .result-image {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
 
     /* 모바일 반응형 */
     @media (max-width: 768px) {
-      #page-container {
-        flex-direction: column;
-        gap: 40px;
-        padding: 20px 10px;
-        overflow-y: auto;
-        height: calc(100vh - 100px);
+      .start-title {
+        font-size: 24px;
       }
-      .container {
-        width: 280px;
-        height: 280px;
+      
+      .start-subtitle {
+        font-size: 14px;
       }
-      .guide-text {
-        width: 280px;
-        font-size: 13px;
-      }
-      .status-container {
+      
+      .input-container {
         width: 280px;
       }
-      #finish-button {
-        bottom: 20px;
-        padding: 14px 35px;
-        font-size: 18px;
-      }
-      #completion-message {
+      
+      .name-input {
         font-size: 16px;
       }
-      #result-image {
-        max-width: 60%;
-        max-height: 50%;
+
+      .question-title {
+        font-size: 15px;
+      }
+
+      .dial-area {
+        width: 300px;
+        height: 300px;
+      }
+
+      .dial-background, .q2-draggable-dial {
+        width: 300px;
+        height: 300px;
+      }
+
+      .touch-pad, .q2-touch-pad {
+        width: 260px;
+        height: 260px;
+      }
+
+      .temperature-display {
+        font-size: 18px;
+      }
+
+      .weather-buttons {
+        gap: 10px;
+      }
+
+      .weather-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+
+      .btn {
+        padding: 14px 35px;
+        font-size: 16px;
+      }
+
+      .waveform-container {
+        width: 150px;
+        height: 25px;
+        top: -40px;
+      }
+
+      .selection-area {
+        flex-direction: column;
+        gap: 15px;
+        bottom: 180px;
       }
     }
 
     @media (max-width: 480px) {
-      #page-container {
-        gap: 30px;
-        padding: 15px 5px;
+      .start-title {
+        font-size: 22px;
       }
-      .container {
-        width: 250px;
-        height: 250px;
+      
+      .input-container {
+        width: 260px;
       }
-      .guide-text {
-        width: 250px;
-        font-size: 12px;
+
+      .dial-area {
+        width: 260px;
+        height: 260px;
       }
-      .status-container {
-        width: 250px;
+
+      .dial-background, .q2-draggable-dial {
+        width: 260px;
+        height: 260px;
+      }
+
+      .touch-pad, .q2-touch-pad {
+        width: 220px;
+        height: 220px;
+      }
+
+      .temperature-display {
+        font-size: 16px;
+      }
+
+      .dial-control {
+        width: 200px;
+      }
+
+      .dial-input {
+        width: 150px;
+      }
+
+      .waveform-container {
+        width: 120px;
+        height: 20px;
+        top: -35px;
       }
     }
   </style>
 </head>
 <body>
-
-<!-- 메인 화면 -->
-<div id="main-screen">
-  <div id="page-container">
-    <!-- Left Dial (Vibration with waveform) -->
-    <div class="main-content">
-      <div id="status-left" class="status-container" aria-hidden="true">
-        <svg id="waveform-svg-left" class="waveform-svg"><path id="waveform-path-left" class="waveform-path" d="M 0 15 L 80 15"></path></svg>
-      </div>
-      <div id="container-left" class="container" role="region" aria-label="Left interactive dial">
-        <img id="outer-ring-left" class="outer-ring" src="https://i.imgur.com/cAtYGyh.png" alt="왼쪽 원형 다이얼" />
-        <div id="inner-pad-left" class="inner-pad">
-          <img class="inner-bg" src="https://i.imgur.com/daKC5T2.png" alt="왼쪽 내부 패드 이미지" />
-          <div id="fill-overlay-left" class="fill-overlay"></div>
-          <div id="trail-container-left" class="trail-container"></div>
-        </div>
-      </div>
-      <p id="guide-text-left" class="guide-text"></p>
-    </div>
-
-    <!-- Middle Dial (Sound) -->
-    <div class="main-content">
-      <div id="status-middle" class="status-container" aria-hidden="true"></div>
-      <div id="container-middle" class="container" role="region" aria-label="Middle interactive dial">
-        <img id="outer-ring-middle" class="outer-ring" src="https://i.imgur.com/TbozTaQ.jpeg" alt="가운데 원형 다이얼" />
-        <div id="inner-pad-middle" class="inner-pad">
-          <img class="inner-bg" src="https://i.imgur.com/CLyC7Oz.png" alt="가운데 내부 패드 이미지" />
-          <div id="fill-overlay-middle" class="fill-overlay"></div>
-          <div id="trail-container-middle" class="trail-container"></div>
-        </div>
-      </div>
-      <p id="guide-text-middle" class="guide-text">
-        겉면의 다이얼을 돌릴 수 있습니다.<br>
-        터치 패널에 마우스를 갖다대거나 터치해보세요.
+  <!-- START 페이지 -->
+  <div id="start-page" class="page start-page fade-in">
+    <div class="start-header">
+      <h1 class="start-title">
+        당신만의 지구 추억의<br>
+        향과 향수병을 제작해보세요.
+      </h1>
+      <p class="start-subtitle">
+        아래 칸에 펜으로 이름을 작성하신 뒤<br>
+        start 버튼을 눌러주세요.
       </p>
     </div>
 
-    <!-- Right Dial (Temperature) -->
-    <div class="main-content">
-      <div id="status-right" class="status-container" aria-hidden="true">
-        <span id="thermometer"><span id="temperature-value">36.5°C</span></span>
+    <div class="input-section">
+      <div class="input-container">
+        <input
+          type="text"
+          id="name-input"
+          placeholder="이름을 입력해주세요"
+          class="name-input"
+          maxlength="20"
+        >
+        <div class="input-line"></div>
       </div>
-      <div id="container-right" class="container" role="region" aria-label="Right interactive dial">
-        <img id="outer-ring-right" class="outer-ring" src="https://i.imgur.com/0qwvVIe.png" alt="오른쪽 원형 다이얼" />
-        <div id="inner-pad-right" class="inner-pad">
-          <img class="inner-bg" src="https://i.imgur.com/wT3AMnE.png" alt="오른쪽 내부 패드 이미지" />
-          <div id="fill-overlay-right" class="fill-overlay"></div>
-          <div id="trail-container-right" class="trail-container"></div>
-        </div>
-      </div>
-      <p id="guide-text-right" class="guide-text"></p>
+    </div>
+
+    <div>
+      <button id="start-btn" class="btn disabled">START</button>
     </div>
   </div>
-  
-  <button id="finish-button">FINISH</button>
-</div>
 
-<!-- 로딩 화면 -->
-<div id="loading-screen">
-  <div class="printer-container">
-    <!-- 흑백 미니멀 스타일 아이콘들 -->
-    <svg class="floating-icon planet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="8"/>
-      <ellipse cx="12" cy="12" rx="11" ry="3"/>
-    </svg>
+  <!-- Q1 페이지 (온도 질문) -->
+  <div id="q1-page" class="page q1-page hidden">
+    <button id="q1-back-btn" class="btn-back">BACK</button>
     
-    <svg class="floating-icon rocket-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
-    </svg>
-    
-    <svg class="floating-icon star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/>
-    </svg>
-    
-    <div class="printer-nozzle"></div>
-    <div class="bottle-container">
-      <div class="bottle-shape"></div>
+    <div class="question-area">
+      <div class="question-number">*총 네개의 질문으로 구성되어있습니다.</div>
+      <h2 class="question-title">Q1. 그 때의 주변의 온도는 어땠나요?</h2>
+      <p class="question-subtitle">가운데 패드를 터치하여 온도를 떠올려보세요.</p>
+    </div>
+
+    <div class="dial-area">
+      <img src="https://i.imgur.com/okVDs9K.png" alt="다이얼 이미지" class="dial-background">
+      <div id="touch-pad" class="touch-pad level-0">
+        <div id="temperature-display" class="temperature-display">36.5°C</div>
+      </div>
+    </div>
+
+    <div class="button-area">
+      <button id="q1-next-btn" class="btn-next disabled">NEXT</button>
     </div>
   </div>
-  <div id="loading-text">병 만드는 중...</div>
-</div>
 
-<!-- 흰 화면 -->
-<div id="white-screen">
-  <!-- 빈 흰 화면 -->
-</div>
-
-<!-- 완료 화면 -->
-<div id="finish-screen">
-  <img id="result-image" alt="결과 이미지" />
-  <div id="completion-message">향기가 완성 되었습니다</div>
-  <button id="home-button">Home</button>
-</div>
-
-<audio id="rain-sound" src="https://actions.google.com/sounds/v1/weather/light_rain.ogg" preload="auto" loop></audio>
-
-<script>
-  // Global variables
-  const rainSound = document.getElementById('rain-sound');
-  rainSound.volume = 0; rainSound.pause();
-
-  let globalDragState = { isDragging: false, dialId: null };
-  
-  let dialMoved = {
-    left: false,
-    middle: false,
-    right: false
-  };
-
-  let dialInstances = {};
-
-  // 3개 이미지
-  const resultImages = [
-    'https://i.imgur.com/uwJHQSt.png',
-    'https://i.imgur.com/rYmbPsr.png', 
-    'https://i.imgur.com/KI2WR6a.png'
-  ];
-
-  // UI Management
-  function checkFinishCondition() {
-    const allMoved = Object.values(dialMoved).every(moved => moved === true);
-    const finishButton = document.getElementById('finish-button');
+  <!-- Q2 페이지 (날씨 질문) -->
+  <div id="q2-page" class="page q2-page hidden">
+    <button id="q2-back-btn" class="btn-back">BACK</button>
     
-    if (allMoved) {
-      finishButton.classList.add('active');
-      finishButton.disabled = false;
-    } else {
-      finishButton.classList.remove('active');
-      finishButton.disabled = true;
+    <div class="question-area">
+      <h2 class="question-title">Q2. 그 날의 날씨는 어땠나요? 날씨를 클릭하고 다이얼을 돌려 날씨의 강도를 표현해주세요.</h2>
+    </div>
+
+    <div class="weather-area">
+      <div class="weather-buttons">
+        <button id="weather-clear-btn" class="weather-btn selected">맑음</button>
+        <button id="weather-rain-btn" class="weather-btn">비</button>
+        <button id="weather-snow-btn" class="weather-btn">눈</button>
+        <button id="weather-wind-btn" class="weather-btn">바람</button>
+      </div>
+    </div>
+
+    <div class="dial-area">
+      <div class="waveform-container">
+        <svg class="waveform-svg" viewBox="0 0 200 30">
+          <path id="waveform-path" class="waveform-path level-0" d="M 10 15 L 30 15 Q 35 10 40 15 T 50 15 L 60 15 Q 70 8 80 15 T 100 15 L 110 15 Q 120 12 130 15 T 150 15 L 170 15 Q 175 18 180 15 T 190 15" />
+        </svg>
+      </div>
+
+      <div class="q2-touch-pad"></div>
+      <img id="q2-draggable-dial" src="https://i.imgur.com/okVDs9K.png" alt="드래그 가능한 다이얼" class="q2-draggable-dial vibration-0">
+    </div>
+
+    <div class="button-area">
+      <button id="q2-next-btn" class="btn-next disabled">NEXT</button>
+    </div>
+  </div>
+
+  <!-- Q3 페이지 (환경 질문) -->
+  <div id="q3-page" class="page q3-page hidden">
+    <button id="q3-back-btn" class="btn-back">BACK</button>
+    
+    <div class="question-area">
+      <div class="question-number">*총 네개의 질문으로 구성되어있습니다.</div>
+      <h2 class="question-title">Q3. 그 때의 주변 환경은 자연과 도시중 어느곳에 가까웠나요?</h2>
+    </div>
+
+    <div class="dial-area">
+      <img src="https://i.imgur.com/okVDs9K.png" alt="다이얼 이미지" class="dial-background">
+      <div id="q3-touch-pad" class="touch-pad level-0"></div>
+    </div>
+
+    <div class="selection-area">
+      <button id="env-nature-btn" class="btn btn-secondary">자연</button>
+      <button id="env-city-btn" class="btn btn-secondary">도시</button>
+    </div>
+
+    <div class="button-area">
+      <button id="q3-next-btn" class="btn-next disabled">NEXT</button>
+    </div>
+  </div>
+
+  <!-- Q4 페이지 (마음 상태) -->
+  <div id="q4-page" class="page q4-page hidden">
+    <button id="q4-back-btn" class="btn-back">BACK</button>
+    
+    <div class="question-area">
+      <div class="question-number">*총 네개의 질문으로 구성되어있습니다.</div>
+      <h2 class="question-title">Q4. 그 때 내 마음은 어땠나요?</h2>
+      <p class="question-subtitle">다이얼을 돌려 온도로 마음의 상태를 표현해보세요.</p>
+    </div>
+
+    <div class="emotion-dial-area">
+      <div id="emotion-temperature-display" class="emotion-display">25°C</div>
+      <div class="dial-control">
+        <input id="emotion-dial" class="dial-input" type="range" min="15" max="35" value="25">
+      </div>
+    </div>
+
+    <div class="button-area">
+      <button id="q4-finish-btn" class="btn-next">FINISH</button>
+    </div>
+  </div>
+
+  <!-- 로딩 페이지 -->
+  <div id="loading-page" class="page loading-page hidden">
+    <div class="loading-text">향기 만드는 중...</div>
+  </div>
+
+  <!-- 결과 페이지 -->
+  <div id="result-page" class="page result-page hidden">
+    <div class="result-message" id="result-message">님의 추억의 향기가 완성 되었습니다.</div>
+    
+    <div class="result-image-container">
+      <img id="result-image" class="result-image" src="https://i.imgur.com/uwJHQSt.png" alt="완성된 향기 이미지">
+    </div>
+
+    <div>
+      <button id="result-home-btn" class="btn btn-secondary">HOME</button>
+    </div>
+  </div>
+
+  <script>
+    // 전역 상태
+    let currentPage = 'start';
+    let answers = {};
+    let touchLevel = 0;
+    let selectedWeather = 'clear';
+    let q2DialRotation = 0;
+    let q2DialStep = 0;
+
+    // 온도 단계 (36.5°C부터 5도씩 증가)
+    const temperatureLevels = [36.5, 41.5, 46.5, 51.5];
+
+    // 결과 이미지들
+    const resultImages = [
+      'https://i.imgur.com/uwJHQSt.png',
+      'https://i.imgur.com/rYmbPsr.png', 
+      'https://i.imgur.com/KI2WR6a.png'
+    ];
+
+    // DOM 요소들
+    const nameInput = document.getElementById('name-input');
+    const startBtn = document.getElementById('start-btn');
+    const touchPad = document.getElementById('touch-pad');
+    const temperatureDisplay = document.getElementById('temperature-display');
+    const q1NextBtn = document.getElementById('q1-next-btn');
+
+    // Q2 요소들
+    const q2DraggableDial = document.getElementById('q2-draggable-dial');
+    const waveformPath = document.getElementById('waveform-path');
+
+    // Q3 요소들
+    const q3TouchPad = document.getElementById('q3-touch-pad');
+
+    // 페이지 전환 함수
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.add('hidden');
+      });
+      
+      const targetPage = document.getElementById(pageId + '-page');
+      if (targetPage) {
+        targetPage.classList.remove('hidden');
+        targetPage.classList.add('fade-in');
+      }
+      
+      currentPage = pageId;
+      console.log('현재 페이지:', pageId);
     }
-  }
 
-  function showLoadingScreen() {
-    const finishButton = document.getElementById('finish-button');
-    if (!finishButton.classList.contains('active')) return;
-    
-    document.getElementById('main-screen').style.display = 'none';
-    document.getElementById('loading-screen').style.display = 'flex';
-    
-    setTimeout(() => {
-      showWhiteScreen();
-    }, 5000);
-  }
-
-  function showWhiteScreen() {
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('white-screen').style.display = 'flex';
-    
-    setTimeout(() => {
-      showFinishScreen();
-    }, 2000);
-  }
-
-  function showFinishScreen() {
-    const randomIndex = Math.floor(Math.random() * resultImages.length);
-    const selectedImage = resultImages[randomIndex];
-    
-    const resultImg = document.getElementById('result-image');
-    resultImg.src = selectedImage;
-    
-    document.getElementById('white-screen').style.display = 'none';
-    document.getElementById('finish-screen').style.display = 'flex';
-  }
-
-  function showMainScreen() {
-    document.getElementById('main-screen').style.display = 'flex';
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('white-screen').style.display = 'none';
-    document.getElementById('finish-screen').style.display = 'none';
-    
-    resetAllDials();
-  }
-
-  function resetAllDials() {
-    dialMoved = {
-      left: false,
-      middle: false,
-      right: false
-    };
-    
-    Object.keys(dialInstances).forEach(dialId => {
-      dialInstances[dialId].reset();
+    // ========== BACK 버튼 이벤트 리스너들 ==========
+    document.getElementById('q1-back-btn').addEventListener('click', function() {
+      showPage('start');
     });
-    
-    rainSound.pause();
-    rainSound.currentTime = 0;
-    rainSound.volume = 0;
-    
-    checkFinishCondition();
-  }
 
-  document.getElementById('finish-button').addEventListener('click', showLoadingScreen);
-  document.getElementById('home-button').addEventListener('click', showMainScreen);
+    document.getElementById('q2-back-btn').addEventListener('click', function() {
+      showPage('q1');
+    });
 
-  // Dial setup - 완전히 새로 작성한 터치 지원 버전
-  function setupDial(dialId, { fillSteps, fillType, effect }) {
-    const container = document.getElementById(`container-${dialId}`);
-    const outerRing = document.getElementById(`outer-ring-${dialId}`);
-    const innerPad = document.getElementById(`inner-pad-${dialId}`);
-    const fillOverlay = document.getElementById(`fill-overlay-${dialId}`);
-    const trailContainer = document.getElementById(`trail-container-${dialId}`);
+    document.getElementById('q3-back-btn').addEventListener('click', function() {
+      showPage('q2');
+    });
 
-    let isDragging = false;
-    let currentFill = 0, fadeTimeout = null;
-    let animationFrame = null;
-    let currentlyDraggedDial = null;
-    
-    let totalRotation = 0;
-    let lastAngle = 0;
-    let currentStep = 0;
-    let initialStep = 0;
+    document.getElementById('q4-back-btn').addEventListener('click', function() {
+      showPage('q3');
+    });
 
-    // 각도 계산 함수 - 개선된 버전
-    function getAngle(clientX, clientY) {
-      const rect = container.getBoundingClientRect();
+    // START 페이지 로직
+    nameInput.addEventListener('input', function() {
+      const isValid = this.value.trim().length > 0;
+      startBtn.classList.toggle('disabled', !isValid);
+    });
+
+    nameInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !startBtn.classList.contains('disabled')) {
+        handleStart();
+      }
+    });
+
+    startBtn.addEventListener('click', handleStart);
+
+    function handleStart() {
+      if (startBtn.classList.contains('disabled')) return;
+      
+      answers.userName = nameInput.value.trim();
+      console.log('사용자 이름:', answers.userName);
+      showPage('q1');
+    }
+
+    // Q1 페이지 로직 (온도 터치패드) - 순환 구조
+    touchPad.addEventListener('click', function(e) {
+      if (touchLevel === 3) {
+        touchLevel = 0;
+      } else {
+        touchLevel++;
+      }
+      
+      touchPad.className = `touch-pad level-${touchLevel}`;
+      
+      const currentTemp = temperatureLevels[touchLevel];
+      temperatureDisplay.textContent = currentTemp + '°C';
+      answers.temperature = currentTemp;
+      
+      // 리플 효과
+      const rect = this.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      const size = 120;
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.classList.add('touch-ripple');
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+
+      if (touchLevel > 0) {
+        q1NextBtn.classList.remove('disabled');
+      } else {
+        q1NextBtn.classList.add('disabled');
+      }
+      
+      console.log('현재 터치 레벨:', touchLevel, '온도:', currentTemp + '°C');
+    });
+
+    q1NextBtn.addEventListener('click', function() {
+      if (this.classList.contains('disabled')) return;
+      
+      console.log('선택된 온도:', answers.temperature);
+      showPage('q2');
+    });
+
+    // Q2 페이지 로직 (날씨 선택 + 다이얼)
+    const weatherButtons = [
+      document.getElementById('weather-clear-btn'),
+      document.getElementById('weather-rain-btn'),
+      document.getElementById('weather-snow-btn'),
+      document.getElementById('weather-wind-btn')
+    ];
+    const q2NextBtn = document.getElementById('q2-next-btn');
+
+    let isQ2Dragging = false;
+    let q2LastAngle = 0;
+
+    // 각도 계산 함수
+    function getQ2Angle(clientX, clientY) {
+      const rect = q2DraggableDial.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
     }
 
-    function normalizeAngleDiff(angle) {
+    // 각도 차이 정규화
+    function normalizeQ2AngleDiff(angle) {
       while (angle > 180) angle -= 360;
       while (angle < -180) angle += 360;
       return angle;
     }
 
-    function triggerDetentFeedback(stepAngle) {
-      outerRing.classList.remove('feedback-pulse');
-      outerRing.style.setProperty('--current-rotation', `${stepAngle}deg`);
-      outerRing.offsetHeight;
-      outerRing.classList.add('feedback-pulse');
+    // Q2 다이얼 피드백 애니메이션
+    function triggerQ2DialFeedback(stepAngle) {
+      q2DraggableDial.classList.remove('feedback');
+      q2DraggableDial.style.setProperty('--current-rotation', `${stepAngle}deg`);
+      q2DraggableDial.offsetHeight;
+      q2DraggableDial.classList.add('feedback');
       setTimeout(() => {
-        outerRing.classList.remove('feedback-pulse');
+        q2DraggableDial.classList.remove('feedback');
       }, 200);
     }
 
-    function updateSoundBars(level) {
-      const middleStatus = document.getElementById('status-middle');
-      middleStatus.innerHTML = '';
-      if (effect === 'sound') {
-        for (let i = 0; i < 3; i++) {
-          const bar = document.createElement('div');
-          bar.className = 'bar';
-          bar.style.height = `${8 + i * 4}px`;
-          bar.style.opacity = i < level ? '1' : '0.15';
-          middleStatus.appendChild(bar);
-        }
-      }
-    }
-
-    function updateTemperatureByStep(stepIdx) {
-      let temp;
-      if (stepIdx === 0) temp = 36.5;
-      else if (stepIdx === 1) temp = 45.0;
-      else if (stepIdx === 2) temp = 55.0;
-      else if (stepIdx === 3) temp = 65.0;
-      else temp = 36.5;
+    // Q2 진동 및 파형 업데이트
+    function updateQ2Vibration() {
+      // 진동 클래스 업데이트 (다이얼 흔들림)
+      q2DraggableDial.className = `q2-draggable-dial vibration-${q2DialStep}`;
       
-      document.getElementById('temperature-value').textContent = `${temp.toFixed(1)}°C`;
-    }
-
-    function updateDialFromStep(triggeredByUser = false) {
+      // 파형 상태 업데이트 (흔들림 없음)
+      waveformPath.className = `waveform-path level-${q2DialStep}`;
+      
+      // 회전 각도 설정
       const stepAngles = [0, 90, 180, 270];
-      let displayAngle = stepAngles[currentStep] || 0;
+      const targetAngle = stepAngles[q2DialStep];
+      q2DraggableDial.style.setProperty('--rotation', `${targetAngle}deg`);
       
-      if (currentStep >= 4) {
-        displayAngle = 360;
-        currentStep = 4;
-      }
-      
-      outerRing.style.transform = `rotate(${displayAngle}deg)`;
-      
-      if (triggeredByUser) {
-        triggerDetentFeedback(displayAngle);
-      }
-      
-      if (currentStep !== initialStep) {
-        dialMoved[dialId] = true;
-        checkFinishCondition();
-      }
-
-      if (effect === 'sound') {
-        let level;
-        if (currentStep === 0) level = 0;
-        else if (currentStep === 1) level = 1;
-        else if (currentStep === 2) level = 2;
-        else if (currentStep === 3 || currentStep === 4) level = 3;
-        else level = 0;
-        
-        rainSound.volume = Math.min(1, Math.max(0, currentStep / 3));
-        updateSoundBars(level);
-      }
-      if (effect === 'temperature') {
-        updateTemperatureByStep(currentStep);
-      }
-    }
-
-    function animateEffect(time) {
-      let amplitude;
-      if (currentStep === 0) amplitude = 0;
-      else if (currentStep === 1) amplitude = 3;
-      else if (currentStep === 2) amplitude = 7;
-      else if (currentStep === 3 || currentStep === 4) amplitude = 12;
-      else amplitude = 0;
-      
-      if (effect === 'vibration') {
-        const vibX = Math.sin(time / 20) * amplitude;
-        const vibY = Math.sin(time / 15) * amplitude * 0.7;
-        container.style.transform = `translate(${vibX}px, ${vibY}px)`;
-        
-        const path = document.getElementById('waveform-path-left');
-        if (path) {
-          const width = 80, height = 30;
-          let d = `M 0 ${height/2}`;
-          
-          if (currentStep === 0) {
-            d = `M 0 ${height/2} L ${width} ${height/2}`;
-          } else if (currentStep === 1) {
-            const freq = 3;
-            for (let x = 0; x <= width; x++) {
-              const yOff = Math.sin(time/180 + (x/width)*Math.PI*freq) * 2;
-              d += ` L ${x} ${height/2 + yOff}`;
-            }
-          } else if (currentStep === 2) {
-            const freq = 5;
-            for (let x = 0; x <= width; x++) {
-              const yOff = Math.sin(time/120 + (x/width)*Math.PI*freq) * 5;
-              d += ` L ${x} ${height/2 + yOff}`;
-            }
-          } else if (currentStep === 3 || currentStep === 4) {
-            const freq = 7;
-            for (let x = 0; x <= width; x++) {
-              const yOff = Math.sin(time/80 + (x/width)*Math.PI*freq) * 10;
-              d += ` L ${x} ${height/2 + yOff}`;
-            }
-          }
-          
-          path.setAttribute('d', d);
-        }
-      }
-      animationFrame = requestAnimationFrame(animateEffect);
-    }
-
-    function startDrag(e) {
-      e.preventDefault();
-      isDragging = true;
-      currentlyDraggedDial = dialId;
-      globalDragState.isDragging = true;
-      globalDragState.dialId = dialId;
-      
-      // 터치/마우스 좌표 처리
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      lastAngle = getAngle(clientX, clientY);
-      
-      outerRing.classList.add('no-transition');
-
-      if (effect === 'sound' && rainSound.paused) rainSound.play();
-      if (effect === 'vibration') {
-        if (!animationFrame) animationFrame = requestAnimationFrame(animateEffect);
-      }
-    }
-
-    function moveDrag(e) {
-      if (!isDragging || currentlyDraggedDial !== dialId) return;
-      e.preventDefault();
-
-      // 터치/마우스 좌표 처리
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const currentAngle = getAngle(clientX, clientY);
-      
-      const angleDiff = normalizeAngleDiff(currentAngle - lastAngle);
-      totalRotation += angleDiff;
-      lastAngle = currentAngle;
-      
-      const newStep = Math.round(totalRotation / 90);
-      const clampedStep = Math.max(0, Math.min(4, newStep));
-      
-      if (clampedStep !== currentStep) {
-        currentStep = clampedStep;
-        updateDialFromStep(true);
-        
-        if (newStep < 0) {
-          totalRotation = 0;
-        } else if (newStep > 4) {
-          totalRotation = 360;
-        }
+      if (q2DialStep > 0) {
+        answers.weather = {
+          type: selectedWeather,
+          intensity: q2DialStep
+        };
+        q2NextBtn.classList.remove('disabled');
       } else {
-        const displayAngle = totalRotation;
-        outerRing.style.transform = `rotate(${displayAngle}deg)`;
+        q2NextBtn.classList.add('disabled');
       }
     }
 
-    function endDrag() {
-      if (isDragging && currentlyDraggedDial === dialId) {
-        isDragging = false;
-        currentlyDraggedDial = null;
-        globalDragState.isDragging = false;
-        globalDragState.dialId = null;
-        
-        if (currentStep === 4) {
-          totalRotation = 360;
-        } else {
-          totalRotation = currentStep * 90;
-        }
-        outerRing.classList.remove('no-transition');
-        updateDialFromStep(true);
-      }
-    }
-
-    // 이벤트 리스너 등록 - 마우스
-    outerRing.addEventListener('mousedown', startDrag);
-    document.addEventListener('mousemove', moveDrag);
-    document.addEventListener('mouseup', endDrag);
-
-    // 이벤트 리스너 등록 - 터치
-    outerRing.addEventListener('touchstart', startDrag, { passive: false });
-    document.addEventListener('touchmove', moveDrag, { passive: false });
-    document.addEventListener('touchend', endDrag);
-    document.addEventListener('touchcancel', endDrag);
-
-    function reset() {
-      isDragging = false;
-      currentFill = 0;
+    // Q2 드래그 시작
+    function startQ2Drag(e) {
+      isQ2Dragging = true;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      q2LastAngle = getQ2Angle(clientX, clientY);
       
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-        animationFrame = null;
-      }
-      
-      totalRotation = 0;
-      currentStep = 0;
-      initialStep = 0;
-      
-      outerRing.classList.remove('no-transition', 'feedback-pulse');
-      container.style.transform = 'translate(0px, 0px)';
-      updateDialFromStep(false);
-      updateFill();
-      trailContainer.innerHTML = '';
-      
-      if (effect === 'vibration') {
-        const path = document.getElementById('waveform-path-left');
-        if (path) {
-          path.setAttribute('d', 'M 0 15 L 80 15');
-        }
-      }
+      q2DraggableDial.classList.add('no-transition');
+      e.preventDefault();
     }
 
-    function updateFill() {
-      let gradient, blendMode = 'overlay', filter = 'blur(15px)', color = 'rgba(100, 120, 255, 0.45)';
-      if (currentFill === 0) gradient = 'none';
-      else {
-        if (fillType === 'donut') {
-          const circleSize = (currentFill / fillSteps) * 100;
-          gradient = `radial-gradient(circle, ${color} ${circleSize}%, transparent ${circleSize + 1}%)`;
-        } else if (fillType === 'circle-out') {
-          filter = 'blur(25px)';
-          const innerSize = 100 - (currentFill / fillSteps) * 100;
-          gradient = `radial-gradient(circle, transparent ${innerSize}%, ${color} ${innerSize + 1}%)`;
-        } else {
-          const fillPercent = (currentFill / fillSteps) * 100;
-          gradient = `linear-gradient(to right, ${color} 0%, ${color} ${fillPercent}%, transparent ${fillPercent}%, transparent 100%)`;
-        }
-      }
-      fillOverlay.style.background = gradient;
-      fillOverlay.style.mixBlendMode = blendMode;
-      fillOverlay.style.filter = filter;
-    }
-
-    // 내부 패드 클릭/터치
-    function handlePadClick(e) {
-      currentFill = (currentFill < fillSteps) ? currentFill + 1 : 0;
-      updateFill();
-      if (fadeTimeout) clearTimeout(fadeTimeout);
-      fadeTimeout = setTimeout(() => { currentFill = 0; updateFill(); }, 4000);
-    }
-
-    innerPad.addEventListener('click', handlePadClick);
-    innerPad.addEventListener('touchstart', handlePadClick);
-
-    // 트레일 효과
-    let trailLastTime = 0;
-    function createTrail(e) {
-      if (globalDragState.isDragging) return;
+    // Q2 드래그 중
+    function moveQ2Drag(e) {
+      if (!isQ2Dragging) return;
       
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const rect = innerPad.getBoundingClientRect();
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-      const now = Date.now();
+      const currentAngle = getQ2Angle(clientX, clientY);
       
-      if (now - trailLastTime > 15) {
-        trailLastTime = now;
-        const dot = document.createElement('div');
-        dot.className = 'trail-dot';
-        dot.style.left = `${x}px`;
-        dot.style.top = `${y}px`;
-        trailContainer.appendChild(dot);
-        setTimeout(() => dot.remove(), 1100);
+      const angleDiff = normalizeQ2AngleDiff(currentAngle - q2LastAngle);
+      
+      q2DialRotation += angleDiff;
+      q2DialRotation = Math.max(0, Math.min(270, q2DialRotation));
+      
+      const newStep = Math.round(q2DialRotation / 90);
+      
+      if (newStep !== q2DialStep && newStep >= 0 && newStep <= 3) {
+        q2DialStep = newStep;
+        triggerQ2DialFeedback(q2DialStep * 90);
+        updateQ2Vibration();
+      } else {
+        const currentRotation = q2DialRotation;
+        q2DraggableDial.style.setProperty('--rotation', `${currentRotation}deg`);
       }
+      
+      q2LastAngle = currentAngle;
+      e.preventDefault();
     }
 
-    innerPad.addEventListener('mousemove', createTrail);
-    innerPad.addEventListener('touchmove', createTrail, { passive: true });
+    // Q2 드래그 종료
+    function endQ2Drag() {
+      if (!isQ2Dragging) return;
+      
+      isQ2Dragging = false;
+      q2DialRotation = q2DialStep * 90;
+      
+      q2DraggableDial.classList.remove('no-transition');
+      updateQ2Vibration();
+    }
 
-    updateFill();
-    if (effect === 'sound') updateSoundBars(0);
-    if (effect === 'temperature') updateTemperatureByStep(0);
-    updateDialFromStep(false);
-    
-    dialInstances[dialId] = { reset };
-  }
+    // Q2 다이얼 이벤트 리스너
+    q2DraggableDial.addEventListener('mousedown', startQ2Drag);
+    document.addEventListener('mousemove', moveQ2Drag);
+    document.addEventListener('mouseup', endQ2Drag);
 
-  // Dials init
-  setupDial('left',   { fillSteps: 6, fillType: 'donut',     effect: 'vibration'   });
-  setupDial('middle', { fillSteps: 9, fillType: 'linear',    effect: 'sound'       });
-  setupDial('right',  { fillSteps: 7, fillType: 'circle-out',effect: 'temperature' });
+    q2DraggableDial.addEventListener('touchstart', startQ2Drag, { passive: false });
+    document.addEventListener('touchmove', moveQ2Drag, { passive: false });
+    document.addEventListener('touchend', endQ2Drag);
 
-  checkFinishCondition();
-</script>
+    // Q2 날씨 선택 버튼
+    weatherButtons.forEach((btn, index) => {
+      btn.addEventListener('click', function() {
+        const weatherTypes = ['clear', 'rain', 'snow', 'wind'];
+        selectQ2Weather(weatherTypes[index], this);
+      });
+    });
+
+    function selectQ2Weather(weather, button) {
+      weatherButtons.forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+      
+      selectedWeather = weather;
+      console.log('선택된 날씨:', weather);
+      
+      updateQ2Vibration();
+    }
+
+    q2NextBtn.addEventListener('click', function() {
+      if (this.classList.contains('disabled')) return;
+      console.log('날씨 정보:', answers.weather);
+      showPage('q3');
+    });
+
+    // Q3 페이지 로직 (환경 선택)
+    const envNatureBtn = document.getElementById('env-nature-btn');
+    const envCityBtn = document.getElementById('env-city-btn');
+    const q3NextBtn = document.getElementById('q3-next-btn');
+
+    envNatureBtn.addEventListener('click', function() {
+      selectEnvironment('nature', this);
+    });
+
+    envCityBtn.addEventListener('click', function() {
+      selectEnvironment('city', this);
+    });
+
+    function selectEnvironment(env, button) {
+      envNatureBtn.classList.remove('selected');
+      envCityBtn.classList.remove('selected');
+      button.classList.add('selected');
+      
+      q3TouchPad.className = 'touch-pad level-2';
+      
+      answers.environment = env;
+      q3NextBtn.classList.remove('disabled');
+      console.log('선택된 환경:', env);
+    }
+
+    q3NextBtn.addEventListener('click', function() {
+      if (this.classList.contains('disabled')) return;
+      showPage('q4');
+    });
+
+    // Q4 페이지 로직 (마음 상태)
+    const emotionDial = document.getElementById('emotion-dial');
+    const emotionTempDisplay = document.getElementById('emotion-temperature-display');
+    const q4FinishBtn = document.getElementById('q4-finish-btn');
+
+    emotionDial.addEventListener('input', function() {
+      const temp = this.value;
+      emotionTempDisplay.textContent = temp + '°C';
+      answers.emotion = parseInt(temp);
+      console.log('마음 온도:', temp);
+    });
+
+    q4FinishBtn.addEventListener('click', function() {
+      console.log('모든 답변 완료:', answers);
+      showLoading();
+    });
+
+    // 로딩 및 결과 표시
+    function showLoading() {
+      showPage('loading');
+      
+      setTimeout(() => {
+        showResult();
+      }, 3000);
+    }
+
+    function showResult() {
+      const randomIndex = Math.floor(Math.random() * resultImages.length);
+      const selectedImage = resultImages[randomIndex];
+      
+      document.getElementById('result-image').src = selectedImage;
+      document.getElementById('result-message').textContent = 
+        `${answers.userName}님의 추억의 향기가 완성 되었습니다.`;
+      
+      showPage('result');
+    }
+
+    // HOME 버튼 (처음으로)
+    document.getElementById('result-home-btn').addEventListener('click', function() {
+      answers = {};
+      touchLevel = 0;
+      selectedWeather = 'clear';
+      q2DialRotation = 0;
+      q2DialStep = 0;
+      
+      nameInput.value = '';
+      startBtn.classList.add('disabled');
+      
+      document.querySelectorAll('.btn').forEach(btn => {
+        btn.classList.remove('selected', 'disabled');
+      });
+      
+      touchPad.className = 'touch-pad level-0';
+      temperatureDisplay.textContent = '36.5°C';
+      
+      document.getElementById('weather-clear-btn').classList.add('selected');
+      q2DraggableDial.className = 'q2-draggable-dial vibration-0';
+      q2DraggableDial.style.setProperty('--rotation', '0deg');
+      waveformPath.className = 'waveform-path level-0';
+      
+      q3TouchPad.className = 'touch-pad level-0';
+      
+      emotionDial.value = 25;
+      emotionTempDisplay.textContent = '25°C';
+      
+      q1NextBtn.classList.add('disabled');
+      q2NextBtn.classList.add('disabled');
+      q3NextBtn.classList.add('disabled');
+      
+      showPage('start');
+    });
+
+    // 터치 지원
+    touchPad.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      this.click();
+    });
+
+    // 초기화
+    selectedWeather = 'clear';
+    updateQ2Vibration();
+    console.log('향기 추억 제작소가 시작되었습니다!');
+  </script>
 </body>
 </html>
