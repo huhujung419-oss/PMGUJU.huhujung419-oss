@@ -8,8 +8,15 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
 
+    :root {
+      --dial-offset: 16px;        /* 다이얼 하향 기본 오프셋 */
+      --pad-extra-offset: 14px;   /* 터치패드가 다이얼보다 더 아래로 */
+      --q2-wave-shift: 28px;      /* Q2 웨이브(진동 바) 하향 정도 */
+      --pad-extra-bump-q123: 12px;/* Q1·Q2·Q3 터치패드만 조금 더 아래로 */
+    } /* 전역 CSS 변수 [MDN] [web:211] */
+
     * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; }
-    body { margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system_ui, sans-serif; background: #fff; color: #333; overflow-x: hidden; }
+    body { margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: #fff; color: #333; overflow-x: hidden; }
 
     .page { min-height: 100vh; position: relative; overflow: hidden; background: #fff; }
     .page.hidden { display: none; }
@@ -24,8 +31,8 @@
     .question-title  { font-size: 20px; font-weight: 700; color: #222; line-height: 1.3; margin: 0; }
     .question-subtitle { font-size: 13px; color: #666; line-height: 1.35; margin: 10px 0 0 0; }
 
-    .dial-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; height: 350px; display: flex; align-items: center; justify-content: center; z-index: 10; }
-    .dial-background { position: absolute; width: 350px; height: 350px; z-index: 1; pointer-events: none; transition: transform .2s ease; }
+    .dial-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; height: 350px; display: flex; align-items: center; justify-content: center; z-index: 10; } /* 레이아웃 [web:157] */
+    .dial-background { position: absolute; width: 350px; height: 350px; z-index: 1; pointer-events: none; transition: transform .2s ease; top: var(--dial-offset); } /* 수직 오프셋 [web:159] */
 
     .button-area { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 10; }
     .btn-next { background: #000; color: #fff; font-weight: 700; font-size: 14px; padding: 8px 20px; border-radius: 18px; border: 0; cursor: pointer; text-transform: uppercase; min-width: 80px; box-shadow: 0 3px 10px rgba(0,0,0,.3); }
@@ -40,7 +47,7 @@
     .name-input { width: 100%; padding: 15px 5px; font-size: 18px; text-align: center; border: 0; outline: 0; background: transparent; }
     .input-line { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #ddd; }
 
-    /* INFO — 선택 시 푸른빛 */
+    /* INFO */
     .info-page .info-center { position: absolute; top: 44%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 420px; text-align: center; }
     .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; justify-items: center; margin: 8px 0 40px; }
     .month-btn { width: 52px; height: 36px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 600; font-size: 14px; background: #fff; color: #555; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
@@ -50,8 +57,9 @@
     .city-input { width: 100%; padding: 12px 10px; font-size: 16px; border: 0; outline: 0; text-align: center; background: transparent; }
     .city-line { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #ddd; }
 
-    /* Q1 균일 링 퍼짐 */
-    .touch-pad { position: absolute; width: 300px; height: 300px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2; background: url('https://i.imgur.com/FTZhg6Z.png') center/cover no-repeat; overflow: hidden; }
+    /* Q1 */
+    .touch-pad { position: absolute; width: 300px; height: 300px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2; background: url('https://i.imgur.com/FTZhg6Z.png') center/cover no-repeat; overflow: hidden; top: calc(var(--dial-offset) + var(--pad-extra-offset)); } /* 기본 [web:159] */
+    #q1-page .touch-pad { top: calc(var(--dial-offset) + var(--pad-extra-offset) + var(--pad-extra-bump-q123)); } /* Q1만 더 아래 [web:159] */
     .touch-pad .ring { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: 0; }
     .touch-pad .ring.blue  { background: radial-gradient(circle, rgba(110,145,255,.20) 0%, rgba(110,145,255,.08) 60%, rgba(110,145,255,0) 75%); }
     .touch-pad .ring.orange{ background: radial-gradient(circle, rgba(255,160,75,.22) 0%, rgba(255,160,75,.10) 60%, rgba(255,160,75,0) 75%); }
@@ -66,10 +74,11 @@
     .weather-btn.selected { background: rgba(111,121,255,.14); color: #3F51B5; box-shadow: 0 2px 10px rgba(90,103,216,.20); }
     .weather-btn.selected::after { display: block; }
 
-    .q2-draggable-dial { position: absolute; width: 350px; height: 350px; transform-origin: center; z-index: 2; transform: rotate(var(--rotation, 0deg)); transition: transform .18s ease; will-change: transform; }
-    .q2-touch-pad { position: absolute; width: 300px; height: 300px; border-radius: 50%; z-index: 3; background: url('https://i.imgur.com/FTZhg6Z.png') center/cover no-repeat; pointer-events: none; }
+    .q2-draggable-dial { position: absolute; width: 350px; height: 350px; transform-origin: center; z-index: 2; transform: rotate(var(--rotation, 0deg)); transition: transform .18s ease; will-change: transform; top: var(--dial-offset); } /* 회전 분리 [web:157] */
+    .q2-touch-pad { position: absolute; width: 300px; height: 300px; border-radius: 50%; z-index: 3; background: url('https://i.imgur.com/FTZhg6Z.png') center/cover no-repeat; pointer-events: none; top: calc(var(--dial-offset) + var(--pad-extra-offset)); } /* 기본 [web:159] */
+    #q2-page .q2-touch-pad { top: calc(var(--dial-offset) + var(--pad-extra-offset) + var(--pad-extra-bump-q123)); } /* Q2만 더 아래 [web:159] */
 
-    .waveform-container { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); z-index: 4; width: 160px; height: 30px; }
+    .waveform-container { position: absolute; top: calc(-50px + var(--q2-wave-shift)); left: 50%; transform: translateX(-50%); z-index: 4; width: 160px; height: 30px; } /* 진동바 하향 [web:159] */
     .waveform-svg { width: 100%; height: 100%; }
     .waveform-path { stroke: #666; stroke-width: 2; fill: none; }
     @keyframes waveFlow { 0%{stroke-dasharray:40 200;stroke-dashoffset:0;}50%{stroke-dasharray:100 140;stroke-dashoffset:-60;}100%{stroke-dasharray:40 200;stroke-dashoffset:-200;} }
@@ -84,7 +93,7 @@
     .q3-icon svg { width: 56px; height: 36px; }
     .q3-hide { display: none; }
 
-    /* LOADING — 컨테이너 유지(72px), 사진만 올림(top: 36px) */
+    /* LOADING */
     .loading-page { display: flex; align-items: center; justify-content: center; }
     .loading-wrap { width: 100%; max-width: 420px; margin-top: 24px; text-align: center; }
     .loading-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 12px; }
@@ -96,19 +105,19 @@
     .liquid-top { position: absolute; left: -40%; width: 180%; height: 16px; bottom: 0; background: radial-gradient(40px 10px at 50% 50%, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 60%) repeat-x; background-size: 80px 16px; opacity: .7; animation: topWave 1.2s ease-in-out infinite alternate; }
     @keyframes topWave { from { transform: translateX(-8px); } to { transform: translateX(8px); } }
 
-    /* RESULT — 질문과 동일 타이포 */
+    /* RESULT */
     .result-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 28px; }
     .result-title { font-size: 20px; font-weight: 700; color: #222; text-align: center; line-height: 1.3; }
     .result-image { max-width: 360px; max-height: 360px; border-radius: 14px; }
 
     /* Q4 */
     .q4-dial-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: 320px; display:flex; align-items:center; justify-content:center; }
-    .q4-dial-img { position: absolute; width: 320px; height: 320px; transform-origin: center; will-change: transform; }
-    .q4-touch { position: absolute; width: 284px; height: 284px; border-radius: 50%; pointer-events: none; background-size: cover; background-position: center; }
-    .q4-state-img { position: absolute; top: -86px; left: 50%; transform: translateX(-50%); width: 52px; height: auto; pointer-events: none; z-index: 6; } /* 위로 올리고 사이즈 축소 */
+    .q4-dial-img { position: absolute; width: 320px; height: 320px; transform-origin: center; will-change: transform; top: var(--dial-offset); } /* 회전은 transform [web:157] */
+    .q4-touch { position: absolute; width: 284px; height: 284px; border-radius: 50%; pointer-events: none; background-size: cover; background-position: center; top: calc(var(--dial-offset) + var(--pad-extra-offset)); } /* 기본 [web:159] */
+    .q4-state-img { position: absolute; top: -86px; left: 50%; transform: translateX(-50%); width: 52px; height: auto; pointer-events: none; z-index: 6; }
 
-    .q4-step-kick { animation: q4Kick .09s cubic-bezier(.2,.8,.2,1); }
-    @keyframes q4Kick { 0%{ transform: scale(1); } 60%{ transform: scale(1.008); } 100%{ transform: scale(1); } }
+    /* Q3 전용: 터치패드 추가 하향 */
+    #q3-page .touch-pad { top: calc(var(--dial-offset) + var(--pad-extra-offset) + var(--pad-extra-bump-q123)); } /* Q3만 더 아래 [web:159] */
 
     @media (max-width: 768px) {
       .start-title { font-size: 24px; }
@@ -116,7 +125,7 @@
       .dial-area { width: 300px; height: 300px; }
       .dial-background, .q2-draggable-dial { width: 300px; height: 300px; }
       .touch-pad, .q2-touch-pad { width: 260px; height: 260px; }
-      .waveform-container { width: 130px; top: -42px; }
+      .waveform-container { width: 130px; }
     }
   </style>
 </head>
@@ -124,14 +133,15 @@
   <!-- START -->
   <div id="start-page" class="page start-page fade-in">
     <div class="start-container">
-      <h1 class="start-title">당신만의 지구 추억의<br>향과 향수병을 제작해보세요.</h1>
+      <h1 class="start-title">당신만의 지구 추억향과<br>향수병을 제작해보세요.</h1>
       <div class="input-wrap">
         <div class="input-inner">
           <input id="name-input" class="name-input" type="text" placeholder="이름을 입력해주세요" />
           <div class="input-line"></div>
         </div>
       </div>
-      <button id="start-btn" class="btn-next disabled">START</button>
+      <!-- 인라인 핸들러 + z-index로 클릭 보장 -->
+      <button id="start-btn" class="btn-next" type="button" style="position:relative; z-index:2;" onclick="show('info')">START</button>
     </div>
   </div>
 
@@ -305,47 +315,67 @@
 
     const audNature=document.getElementById('aud-nature'); const audCrowd=document.getElementById('aud-crowd'); const audHorn=document.getElementById('aud-horn');
 
+    // 무음 자동재생 시도
     function tryPlayMuted(){ try{ audNature.muted=true; audCrowd.muted=true; audNature.play().catch(()=>{}); audCrowd.play().catch(()=>{});}catch(e){} }
     window.addEventListener('load', tryPlayMuted, {once:true}); document.addEventListener('pointerdown', tryPlayMuted, {once:true});
 
     function show(id){
       document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
-      const page=document.getElementById(id+'-page'); page.classList.remove('hidden'); page.classList.add('fade-in');
+      const page=document.getElementById(id+'-page');
+      page.classList.remove('hidden');
+      page.classList.add('fade-in');
+
       if(id==='loading') startPrinting(); else stopPrinting();
-      if(id==='q3'){ q3TargetRotation=0; q3CurrentRotation=0; q3DragAccum=0; q3Dragging=false; try{ audNature.muted=false; audCrowd.muted=false; audNature.play().catch(()=>{}); audCrowd.play().catch(()=>{});}catch(e){} }
+
+      if(id==='q3'){
+        q3TargetRotation=0; q3CurrentRotation=0; q3DragAccum=0; q3Dragging=false;
+        try{ audNature.muted=false; audCrowd.muted=false; audNature.play().catch(()=>{}); audCrowd.play().catch(()=>{});}catch(e){}
+      }
     }
 
     function resetAll(){
-      nameInput.value=''; startBtn.classList.add('disabled');
+      // START
+      nameInput.value='';
+
+      // INFO
       infoMonth=null; cityInput.value=''; infoNext.classList.add('disabled'); monthGrid.querySelectorAll('.month-btn').forEach(b=>b.classList.remove('selected'));
 
+      // Q1
       q1Label.textContent='normal'; q1Next.classList.remove('disabled');
 
+      // Q2
       selectedWeather=null; document.querySelectorAll('.weather-btn').forEach(b=>b.classList.remove('selected'));
       q2DialRotation=0; q2DialStep=0; q2Dial.style.setProperty('--rotation','0deg'); q2Pad.className='q2-touch-pad vib-0';
       wave.setAttribute('d','M 10 15 L 150 15'); wave.classList.remove('wave-anim-1','wave-anim-2','wave-anim-3'); q2Next.classList.add('disabled');
 
+      // Q3
       q3Dial.style.transform='rotate(0deg)'; iconLeaf.classList.remove('q3-hide'); iconCity.classList.add('q3-hide'); q3Step=1;
 
+      // Q4
       q4State={ target:0, current:0, dragging:false, lastA:0, lastStep:0, lastImgKey:'0' };
-      q4DialImg.style.transform='rotate(0deg)';
-      q4StateImg.src='https://i.imgur.com/cdMEbIV.png';
+      q4DialImg.style.transform='rotate(0deg)'; q4StateImg.src='https://i.imgur.com/cdMEbIV.png';
     }
-
-    // START
-    nameInput.addEventListener('input', ()=> startBtn.classList.toggle('disabled', nameInput.value.trim().length===0));
-    startBtn.addEventListener('click', ()=>{ if(startBtn.classList.contains('disabled')) return; answers.userName=nameInput.value.trim(); show('info'); });
 
     // INFO
     infoBack.addEventListener('click', ()=> show('start'));
-    monthGrid.querySelectorAll('.month-btn').forEach((btn, idx)=> btn.addEventListener('click', ()=>{ monthGrid.querySelectorAll('.month-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); infoMonth=idx+1; validateInfo(); }));
+    monthGrid.querySelectorAll('.month-btn').forEach((btn, idx)=> btn.addEventListener('click', ()=>{
+      monthGrid.querySelectorAll('.month-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected'); infoMonth=idx+1; validateInfo();
+    }));
     cityInput.addEventListener('input', validateInfo);
     function validateInfo(){ const ok=!!infoMonth && cityInput.value.trim().length>0; infoNext.classList.toggle('disabled', !ok); }
-    infoNext.addEventListener('click', ()=>{ if(infoNext.classList.contains('disabled')) return; answers.month=infoMonth; answers.city=cityInput.value.trim(); show('q1'); });
+    infoNext.addEventListener('click', ()=>{
+      if(infoNext.classList.contains('disabled')) return;
+      answers.month=infoMonth; answers.city=cityInput.value.trim(); show('q1');
+    });
 
-    // Q1 normal ↔ cold ↔ hot
+    // Q1
     const Q1_SOSO=0, Q1_COOL=1, Q1_WARM=2; const q1Order=[Q1_SOSO,Q1_COOL,Q1_WARM]; let q1Idx=0;
-    function playRings(color){ [ring1,ring2].forEach(r=>{ r.className='ring'; r.style.animation='none'; void r.offsetWidth; r.classList.add(color?'blue':'orange'); }); ring1.style.animation='ringSpread 950ms ease-out forwards'; ring2.style.animation='ringSpread 950ms ease_out 140ms forwards'; }
+    function playRings(color){
+      [ring1,ring2].forEach(r=>{ r.className='ring'; r.style.animation='none'; void r.offsetWidth; r.classList.add(color?'blue':'orange'); });
+      ring1.style.animation='ringSpread 950ms ease-out forwards';
+      ring2.style.animation='ringSpread 950ms ease-out 140ms forwards';
+    }
     function applyQ1(state){
       if(state===Q1_COOL){ q1Label.textContent='cold'; playRings(true); }
       else if(state===Q1_WARM){ q1Label.textContent='hot'; playRings(false); }
@@ -359,41 +389,91 @@
 
     // Q2
     const weatherBtns=[ 'weather-clear-btn','weather-rain-btn','weather-snow-btn','weather-wind-btn' ].map(id=>document.getElementById(id));
-    weatherBtns.forEach((btn,i)=> btn.addEventListener('click', ()=>{ weatherBtns.forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); selectedWeather=['clear','rain','snow','wind'][i]; updateQ2(); }));
+    weatherBtns.forEach((btn,i)=> btn.addEventListener('click', ()=>{
+      weatherBtns.forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected'); selectedWeather=['clear','rain','snow','wind'][i]; updateQ2();
+    }));
     function angleAt(el, x, y){ const r=el.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2; return Math.atan2(y-cy, x-cx)*180/Math.PI; }
     function norm(a){ while(a>180) a-=360; while(a<-180)a+=360; return a; }
     let dragging=false, lastA=0; const stepAngles=[0,90,180,270];
-    const wavePaths=[ 'M 10 15 L 150 15','M 10 15 Q 20 8 30 15 Q 40 22 50 15 Q 60 8 70 15 Q 80 22 90 15 Q 100 8 110 15 Q 120 22 130 15 Q 140 8 150 15','M 10 15 Q 18 6 26 15 Q 34 24 42 15 Q 50 6 58 15 Q 66 24 74 15 Q 82 6 90 15 Q 98 24 106 15 Q 114 6 122 15 Q 130 24 138 15 Q 146 6 150 15','M 10 15 Q 16 4 22 15 Q 28 26 34 15 Q 40 4 46 15 Q 52 26 58 15 Q 64 4 70 15 Q 76 26 82 15 Q 88 4 94 15 Q 100 26 106 15 Q 112 4 118 15 Q 124 26 130 15 Q 136 4 142 15 Q 148 26 150 15' ];
+    const wavePaths=[
+      'M 10 15 L 150 15',
+      'M 10 15 Q 20 8 30 15 Q 40 22 50 15 Q 60 8 70 15 Q 80 22 90 15 Q 100 8 110 15 Q 120 22 130 15 Q 140 8 150 15',
+      'M 10 15 Q 18 6 26 15 Q 34 24 42 15 Q 50 6 58 15 Q 66 24 74 15 Q 82 6 90 15 Q 98 24 106 15 Q 114 6 122 15 Q 130 24 138 15 Q 146 6 150 15',
+      'M 10 15 Q 16 4 22 15 Q 28 26 34 15 Q 40 4 46 15 Q 52 26 58 15 Q 64 4 70 15 Q 76 26 82 15 Q 88 4 94 15 Q 100 26 106 15 Q 112 4 118 15 Q 124 26 130 15 Q 136 4 142 15 Q 148 26 150 15'
+    ];
     function setVibration(step){ q2Pad.className=`q2-touch-pad vib-${step}`; }
-    function updateQ2(){ q2Dial.style.setProperty('--rotation', `${stepAngles[q2DialStep]}deg`); setVibration(q2DialStep); wave.setAttribute('d', wavePaths[q2DialStep]); wave.classList.remove('wave-anim-1','wave-anim-2','wave-anim-3'); if(q2DialStep===1) wave.classList.add('wave-anim-1'); if(q2DialStep===2) wave.classList.add('wave-anim-2'); if(q2DialStep===3) wave.classList.add('wave-anim-3'); if(selectedWeather && q2DialStep>0) q2Next.classList.remove('disabled'); else q2Next.classList.add('disabled'); }
-    function startQ2Drag(e){ dragging=true; const pt=e.touches?e.touches[0]:e; lastA=angleAt(q2Dial, pt.clientX, pt.clientY); q2Dial.style.transition='none'; e.preventDefault(); }
-    function moveQ2Drag(e){ if(!dragging) return; const pt=e.touches?e.touches[0]:e; const a=angleAt(q2Dial, pt.clientX, pt.clientY); const d=norm(a-lastA); q2DialRotation=Math.max(0, Math.min(270, q2DialRotation+d)); const ns=Math.round(q2DialRotation/90); if(ns!==q2DialStep){ q2DialStep=ns; updateQ2(); } else { q2Dial.style.setProperty('--rotation', `${q2DialRotation}deg`); } lastA=a; e.preventDefault(); }
-    function endQ2Drag(){ if(!dragging) return; dragging=false; q2DialRotation=q2DialStep*90; q2Dial.style.transition='transform .18s ease'; q2Dial.style.setProperty('--rotation', `${stepAngles[q2DialStep]}deg`); updateQ2(); }
+    function updateQ2(){
+      q2Dial.style.setProperty('--rotation', `${stepAngles[q2DialStep]}deg`);
+      setVibration(q2DialStep);
+      wave.setAttribute('d', wavePaths[q2DialStep]);
+      wave.classList.remove('wave-anim-1','wave-anim-2','wave-anim-3');
+      if(q2DialStep===1) wave.classList.add('wave-anim-1');
+      if(q2DialStep===2) wave.classList.add('wave-anim-2');
+      if(q2DialStep===3) wave.classList.add('wave-anim-3');
+      if(selectedWeather && q2DialStep>0) q2Next.classList.remove('disabled'); else q2Next.classList.add('disabled');
+    }
+    function startQ2Drag(e){
+      dragging=true; const pt=e.touches?e.touches[0]:e;
+      lastA=angleAt(q2Dial, pt.clientX, pt.clientY); q2Dial.style.transition='none'; e.preventDefault();
+    }
+    function moveQ2Drag(e){
+      if(!dragging) return; const pt=e.touches?e.touches[0]:e;
+      const a=angleAt(q2Dial, pt.clientX, pt.clientY); const d=norm(a-lastA);
+      q2DialRotation=Math.max(0, Math.min(270, q2DialRotation+d));
+      const ns=Math.round(q2DialRotation/90);
+      if(ns!==q2DialStep){ q2DialStep=ns; updateQ2(); } else { q2Dial.style.setProperty('--rotation', `${q2DialRotation}deg`); }
+      lastA=a; e.preventDefault();
+    }
+    function endQ2Drag(){
+      if(!dragging) return; dragging=false;
+      q2DialRotation=q2DialStep*90; q2Dial.style.transition='transform .18s ease';
+      q2Dial.style.setProperty('--rotation', `${stepAngles[q2DialStep]}deg`); updateQ2();
+    }
     q2Dial.addEventListener('mousedown', startQ2Drag); document.addEventListener('mousemove', moveQ2Drag); document.addEventListener('mouseup', endQ2Drag);
     q2Dial.addEventListener('touchstart', startQ2Drag, {passive:false}); document.addEventListener('touchmove', moveQ2Drag, {passive:false}); document.addEventListener('touchend', endQ2Drag);
     q2Next.addEventListener('click', ()=> show('q3'));
 
-    // Q3 중앙 기본 + 첫 드래그부터 좌우 가능
+    // Q3 좌우 드래그
     let q3Dragging=false, q3LastA=0, q3TargetRotation=0, q3CurrentRotation=0, q3DragAccum=0;
     function angleQ3(el, x, y){ const r=el.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2; return Math.atan2(y-cy, x-cx)*180/Math.PI; }
     function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-    function setQ3Step(step){ if(step===q3Step) return; q3Step=step; if(step===0){ iconLeaf.classList.remove('q3-hide'); iconCity.classList.add('q3-hide'); q3Next.classList.remove('disabled'); } else if(step===2){ iconLeaf.classList.add('q3-hide'); iconCity.classList.remove('q3-hide'); q3Next.classList.remove('disabled'); } else { iconLeaf.classList.remove('q3-hide'); iconCity.classList.add('q3-hide'); q3Next.classList.add('disabled'); } }
+    function setQ3Step(step){
+      if(step===q3Step) return; q3Step=step;
+      if(step===0){ iconLeaf.classList.remove('q3-hide'); iconCity.classList.add('q3-hide'); q3Next.classList.remove('disabled'); }
+      else if(step===2){ iconLeaf.classList.add('q3-hide'); iconCity.classList.remove('q3-hide'); q3Next.classList.remove('disabled'); }
+      else { iconLeaf.classList.remove('q3-hide'); iconCity.classList.add('q3-hide'); q3Next.classList.add('disabled'); }
+    }
     const NAT_MAX=0.8, CITY_MAX=0.65, CURVE=1.6; let lastHornAt=0;
-    function updateQ3Sound(){ const x=clamp(q3CurrentRotation/45,-1,1); const nat=Math.pow(Math.max(0,-x),CURVE); const city=Math.pow(Math.max(0, x),CURVE); audNature.volume=NAT_MAX*nat; audCrowd.volume=CITY_MAX*city; const now=performance.now(); if(city>0.85 && now-lastHornAt>2500){ try{ audHorn.currentTime=0; audHorn.play(); }catch(e){} lastHornAt=now; } }
-    function animateQ3(){ q3CurrentRotation+=(q3TargetRotation-q3CurrentRotation)*0.15; q3Dial.style.transform=`rotate(${q3CurrentRotation}deg)`; const r=q3CurrentRotation; if(r<=-18) setQ3Step(0); else if(r>=18) setQ3Step(2); else setQ3Step(1); updateQ3Sound(); requestAnimationFrame(animateQ3); }
+    function updateQ3Sound(){
+      const x=clamp(q3CurrentRotation/45,-1,1); const nat=Math.pow(Math.max(0,-x),CURVE); const city=Math.pow(Math.max(0, x),CURVE);
+      audNature.volume=NAT_MAX*nat; audCrowd.volume=CITY_MAX*city;
+      const now=performance.now(); if(city>0.85 && now-lastHornAt>2500){ try{ audHorn.currentTime=0; audHorn.play(); }catch(e){} lastHornAt=now; }
+    }
+    function animateQ3(){
+      q3CurrentRotation+=(q3TargetRotation-q3CurrentRotation)*0.15;
+      q3Dial.style.transform=`rotate(${q3CurrentRotation}deg)`;
+      const r=q3CurrentRotation; if(r<=-18) setQ3Step(0); else if(r>=18) setQ3Step(2); else setQ3Step(1);
+      updateQ3Sound(); requestAnimationFrame(animateQ3);
+    }
     requestAnimationFrame(animateQ3);
     q3Dial.addEventListener('mousedown', e=>{ q3Dragging=true; q3LastA=angleQ3(q3Dial,e.clientX,e.clientY); q3DragAccum=0; e.preventDefault(); });
-    document.addEventListener('mousemove', e=>{ if(!q3Dragging) return; const a=angleQ3(q3Dial,e.clientX,e.clientY); let d=a-q3LastA; while(d>180)d-=360; while(d<-180)d+=360; q3DragAccum+=d; q3TargetRotation=clamp(q3DragAccum,-45,45); q3LastA=a; e.preventDefault(); });
+    document.addEventListener('mousemove', e=>{
+      if(!q3Dragging) return; const a=angleQ3(q3Dial,e.clientX,e.clientY); let d=a-q3LastA;
+      while(d>180)d-=360; while(d<-180)d+=360; q3DragAccum+=d; q3TargetRotation=clamp(q3DragAccum,-45,45); q3LastA=a; e.preventDefault();
+    });
     document.addEventListener('mouseup', ()=>{ if(!q3Dragging) return; q3Dragging=false; q3TargetRotation=[-45,0,45][q3Step]; });
     q3Dial.addEventListener('touchstart', e=>{ q3Dragging=true; const t=e.touches[0]; q3LastA=angleQ3(q3Dial,t.clientX,t.clientY); q3DragAccum=0; e.preventDefault(); }, {passive:false});
-    document.addEventListener('touchmove', e=>{ if(!q3Dragging) return; const t=e.touches[0]; const a=angleQ3(q3Dial,t.clientX,t.clientY); let d=a-q3LastA; while(d>180)d-=360; while(d<-180)d+=360; q3DragAccum+=d; q3TargetRotation=clamp(q3DragAccum,-45,45); q3LastA=a; e.preventDefault(); }, {passive:false});
+    document.addEventListener('touchmove', e=>{
+      if(!q3Dragging) return; const t=e.touches[0]; const a=angleQ3(q3Dial,t.clientX,t.clientY); let d=a-q3LastA;
+      while(d>180)d-=360; while(d<-180)d+=360; q3DragAccum+=d; q3TargetRotation=clamp(q3DragAccum,-45,45); q3LastA=a; e.preventDefault();
+    }, {passive:false});
     document.addEventListener('touchend', ()=>{ if(!q3Dragging) return; q3Dragging=false; q3TargetRotation=[-45,0,45][q3Step]; });
     q3Next.addEventListener('click', ()=> show('q4'));
 
     // Q4: 360° + 단계별 상태 이미지
     const Q4_STEP_COUNT=7, Q4_STEP_DEG=360/Q4_STEP_COUNT;
     let q4State={ target:0, current:0, dragging:false, lastA:0, lastStep:0, lastImgKey:'0' };
-
     const Q4_IMAGES={
       '0':'https://i.imgur.com/cdMEbIV.png',
       '-1':'https://i.imgur.com/6KM038i.png',
@@ -403,29 +483,18 @@
       '2':'https://i.imgur.com/gp6VpuU.png',
       '3':'https://i.imgur.com/gp6VpuU.png'
     };
-
     function q4NearestStep(angle){
       const idx=Math.round(angle/Q4_STEP_DEG);
       const wrapped=((idx%Q4_STEP_COUNT)+Q4_STEP_COUNT)%Q4_STEP_COUNT;
-      const map=[-3,-2,-1,0,1,2,3];
-      return map[wrapped];
+      const map=[-3,-2,-1,0,1,2,3]; return map[wrapped];
     }
     function q4AngleAt(el,x,y){ const r=el.getBoundingClientRect(); return Math.atan2(y-(r.top+r.height/2), x-(r.left+r.width/2))*180/Math.PI; }
     function q4Norm(d){ while(d>180)d-=360; while(d<-180)d+=360; return d; }
-
     function q4UpdateImage(step){
       let key='0';
-      if(step<=-2) key='-2';
-      else if(step===-1) key='-1';
-      else if(step===0) key='0';
-      else if(step===1) key='1';
-      else if(step>=2) key='2';
-      if(key!==q4State.lastImgKey){
-        q4StateImg.src = Q4_IMAGES[key];
-        q4State.lastImgKey = key;
-      }
+      if(step<=-2) key='-2'; else if(step===-1) key='-1'; else if(step===0) key='0'; else if(step===1) key='1'; else if(step>=2) key='2';
+      if(key!==q4State.lastImgKey){ q4StateImg.src = Q4_IMAGES[key]; q4State.lastImgKey = key; }
     }
-
     function q4Animate(){
       q4State.current += (q4State.target - q4State.current) * 0.18;
       q4DialImg.style.transform = `rotate(${q4State.current}deg)`;
@@ -441,41 +510,28 @@
 
     q4DialImg.addEventListener('mousedown', e=>{ q4State.dragging=true; q4State.lastA=q4AngleAt(q4DialImg,e.clientX,e.clientY); e.preventDefault(); });
     document.addEventListener('mousemove', e=>{
-      if(!q4State.dragging) return;
-      const a=q4AngleAt(q4DialImg,e.clientX,e.clientY);
-      const d=q4Norm(a-q4State.lastA);
-      q4State.target+=d;
-      q4State.lastA=a; e.preventDefault();
+      if(!q4State.dragging) return; const a=q4AngleAt(q4DialImg,e.clientX,e.clientY); const d=q4Norm(a-q4State.lastA);
+      q4State.target+=d; q4State.lastA=a; e.preventDefault();
     });
     document.addEventListener('mouseup', ()=>{
-      if(!q4State.dragging) return;
-      q4State.dragging=false;
-      const step=Math.round(q4State.target/Q4_STEP_DEG);
-      q4State.target=step*Q4_STEP_DEG;
+      if(!q4State.dragging) return; q4State.dragging=false; const step=Math.round(q4State.target/Q4_STEP_DEG); q4State.target=step*Q4_STEP_DEG;
     });
 
     q4DialImg.addEventListener('touchstart', e=>{
-      q4State.dragging=true; const t=e.touches[0];
-      q4State.lastA=q4AngleAt(q4DialImg,t.clientX,t.clientY); e.preventDefault();
+      q4State.dragging=true; const t=e.touches[0]; q4State.lastA=q4AngleAt(q4DialImg,t.clientX,t.clientY); e.preventDefault();
     }, {passive:false});
     document.addEventListener('touchmove', e=>{
-      if(!q4State.dragging) return;
-      const t=e.touches[0]; const a=q4AngleAt(q4DialImg,t.clientX,t.clientY);
-      const d=q4Norm(a-q4State.lastA);
+      if(!q4State.dragging) return; const t=e.touches[0]; const a=q4AngleAt(q4DialImg,t.clientX,t.clientY); const d=q4Norm(a-q4State.lastA);
       q4State.target+=d; q4State.lastA=a; e.preventDefault();
     }, {passive:false});
     document.addEventListener('touchend', ()=>{
-      if(!q4State.dragging) return;
-      q4State.dragging=false;
-      const step=Math.round(q4State.target/Q4_STEP_DEG);
-      q4State.target=step*Q4_STEP_DEG;
+      if(!q4State.dragging) return; q4State.dragging=false; const step=Math.round(q4State.target/Q4_STEP_DEG); q4State.target=step*Q4_STEP_DEG;
     });
 
     // LOADING: 5초, 채움 45%
     let loadingRAF=null, loadingStart=0, loadingDur=5000, fillRatio=0.45;
     function startPrinting(){
-      stopPrinting();
-      loadingStart=performance.now();
+      stopPrinting(); loadingStart=performance.now();
       const clipH=windowClip?windowClip.clientHeight:0;
       function tick(now){
         if(!windowClip) return;
